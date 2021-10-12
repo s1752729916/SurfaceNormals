@@ -119,10 +119,10 @@ class SurfaceNormalsDataset(Dataset):
             # apply mask
             mask_img = det_tf.augment_image(mask_img, hooks=ia.HooksImages(activator=self._activator_masks))  # some transforms only appy to inputs, not label
 
-        #-- 5、convert to tensor
-        input_tensor = torch.from_numpy(input_img_arr.copy())
-        label_tensor = torch.from_numpy(label_img.copy())
-        mask_tensor = torch.from_numpy(mask_img.copy())
+        #-- 4、normalize
+        input_tensor = transforms.ToTensor()(input_img_arr.copy().transpose(1,2,0))  #ToTensor contains the normalization process
+        label_tensor = transforms.ToTensor()(label_img.copy().transpose(1,2,0))
+        mask_tensor = torch.from_numpy(mask_img)
 
 
         # print("input shape:",input_tensor.shape)
@@ -272,28 +272,28 @@ if(__name__ == '__main__'):
                                      input_normal_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals',
                                      label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals',
                                      mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks',transform=augs_train,input_only=input_only)
-    print("dataset")
-    batch_size = 16
-    testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True,prefetch_factor=2)
-    print("dataloader")
-    # Show 1 Shuffled Batch of Images
-    for ii, batch in enumerate(testloader):
-        # Get Batch
-        img, label,mask = batch
-        print("ii:",ii)
-        print('image shape, type: ', img.shape, img.dtype)
-        print('label shape, type: ', label.shape, label.dtype)
-        print('mask shape, type: ', mask.shape, mask.dtype)
-        print(" ")
-        print(" ")
-
-        # # Show Batch
-        # sample = torch.cat((img[1:,:,:], label), 5)
-        # im_vis = torchvision.utils.make_grid(sample, nrow=batch_size // 4, padding=2, normalize=True, scale_each=True)
-        # plt.imshow(im_vis.numpy().transpose(1, 2, 0))
-        # plt.show()
-
-        # break
+    # print("dataset")
+    # batch_size = 16
+    # testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True,prefetch_factor=2)
+    # print("dataloader")
+    # # Show 1 Shuffled Batch of Images
+    # for ii, batch in enumerate(testloader):
+    #     # Get Batch
+    #     img, label,mask = batch
+    #     print("ii:",ii)
+    #     print('image shape, type: ', img.shape, img.dtype)
+    #     print('label shape, type: ', label.shape, label.dtype)
+    #     print('mask shape, type: ', mask.shape, mask.dtype)
+    #     print(" ")
+    #     print(" ")
+    #
+    #     # # Show Batch
+    #     # sample = torch.cat((img[1:,:,:], label), 5)
+    #     # im_vis = torchvision.utils.make_grid(sample, nrow=batch_size // 4, padding=2, normalize=True, scale_each=True)
+    #     # plt.imshow(im_vis.numpy().transpose(1, 2, 0))
+    #     # plt.show()
+    #
+    #     # break
 
 
 
@@ -315,5 +315,6 @@ if(__name__ == '__main__'):
     ax5 = plt.subplot(242)
     ax5.imshow(input_img_arr[0,:,:])
     ax6 = plt.subplot(243)
+    print(mask_img.shape)
     ax6.imshow(mask_img)
     plt.show()
