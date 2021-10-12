@@ -2,6 +2,8 @@
 import os
 import glob
 import sys
+import time
+import numpy
 from PIL import Image
 import Imath
 import numpy as np
@@ -13,6 +15,8 @@ from torchvision import transforms
 from imgaug import augmenters as iaa
 import imgaug as ia
 import imageio
+
+import API.utils
 from API.utils import exr_loader
 class SurfaceNormalsDataset(Dataset):
     """
@@ -47,6 +51,8 @@ class SurfaceNormalsDataset(Dataset):
         self._datalist_mask = []
         self._datalist_label = []
         self._create_lists_filenames()
+    def __len__(self):
+        return len(self._datalist_input_rgb)
 
 
     def __getitem__(self, index):
@@ -55,9 +61,92 @@ class SurfaceNormalsDataset(Dataset):
         Args:
             index (int): index of the item required from dataset.
         Returns:
-            torch.Tensor: Tensor of input image
-            torch.Tensor: Tensor of label (Tensor of zeroes is labels_dir is "" or None)
+            torch.Tensor: Tensor of input image, shape is (13, Height, Width), the 13 channels are (norm_0 x 3 , norm_1 x 3, norm_2 x 3, norm_3 x 3, intensity)
+            torch.Tensor: Tensor of label (Tensor of zeroes is labels_dir is "" or None), the shape (3, Height, Width) for real norm
+            torch.Tensor: Tensor of mask
         '''
+        #-- 1、prepare paths
+        rgb_img_path = self._datalist_input_rgb[index]
+        norm_0_path = self._datalist_input_normal_0[index]
+        norm_1_path = self._datalist_input_normal_1[index]
+        norm_2_path = self._datalist_input_normal_2[index]
+        norm_3_path = self._datalist_input_normal_3[index]
+        mask_path = self._datalist_mask[index]
+        label_path = self._datalist_label[index]
+
+        #-- 2、load imgs
+        rgb_img = imageio.imread(rgb_img_path)  # numpy array shape is (height, width, 3)
+        grey_img = API.utils.rgb2grey(rgb_img)  # numpy array shape is (height, width)
+        norm_0 = API.utils.exr_loader(norm_0_path)  #numpy array shape is (height, width, 3)
+        norm_0 = API.utils.normal_to_rgb(norm_0)
+        norm_1 = API.utils.exr_loader(norm_1_path)
+        norm_1 = API.utils.normal_to_rgb(norm_1)
+        norm_2 = API.utils.exr_loader(norm_2_path)
+        norm_2 = API.utils.normal_to_rgb(norm_2)
+        norm_3 = API.utils.exr_loader(norm_3_path)
+        norm_3 = API.utils.normal_to_rgb(norm_3)
+        mask_img = API.utils.mask_loader(mask_path)
+        label_img = API.utils.exr_loader(label_path)
+        label_img = API.utils.normal_to_rgb(label_img).transpose(2,0,1)  # To Shape (3 x H x W)
+
+
+
+       #-- 3、concat inputs
+        start = time.time()
+        height = grey_img.shape[0]
+        width = grey_img.shape[1]
+        input_img_arr = numpy.zeros([13,height,width],dtype = np.uint8)    #  shape is (13 x H x W)
+        input_img_arr[0,:,:] = grey_img
+        input_img_arr[1:4,:,:] = norm_0.transpose(2,0,1)  #3 x H x W
+        input_img_arr[4:7,:,:] = norm_1.transpose(2,0,1)
+        input_img_arr[7:10,:,:] = norm_2.transpose(2,0,1)
+        input_img_arr[10:13,:,:] = norm_3.transpose(2,0,1)
+
+        #-- 5、apply mask to inputs and label
+        input_img_arr[:,mask_img==0] = 0
+        label_img[:,mask_img==0] = 0
+
+        #-- 4、apply image augmentations
+        if self.transform:
+            # apply augment to inputs
+            det_tf = self.transform.to_deterministic()
+            input_img_arr = det_tf.augment_image(input_img_arr.transpose(1,2,0))  #augment_image require shape (H, W, C)
+            input_img_arr = input_img_arr.transpose(2,0,1)  # To Shape: (13, H, W)
+
+            # apply augment to label
+            label_img = det_tf.augment_image(label_img.transpose(1,2,0), hooks=ia.HooksImages(activator=self._activator_masks))  # some transforms only appy to inputs, not label
+            label_img = label_img.transpose(2,0,1)
+            # apply mask
+            mask_img = det_tf.augment_image(mask_img, hooks=ia.HooksImages(activator=self._activator_masks))  # some transforms only appy to inputs, not label
+
+        #-- 5、convert to tensor
+        input_tensor = torch.from_numpy(input_img_arr.copy())
+        label_tensor = torch.from_numpy(label_img.copy())
+        mask_tensor = torch.from_numpy(mask_img.copy())
+
+
+        # print("input shape:",input_tensor.shape)
+        # print("label_tensor:",label_tensor.shape)
+        # print("mask_tensor:",mask_tensor.shape)
+
+        # fig = plt.figure()
+        # ax0 = plt.subplot(611)
+        # ax0.imshow(label_img.transpose(1,2,0))
+        # ax1 = plt.subplot(612)
+        # ax1.imshow(input_img_arr[1:4,:,:].transpose(1,2,0))
+        # ax2 = plt.subplot(613)
+        # ax2.imshow(input_img_arr[4:7,:,:].transpose(1,2,0))
+        # ax3 = plt.subplot(614)
+        # ax3.imshow(input_img_arr[7:10,:,:].transpose(1,2,0))
+        # ax4 = plt.subplot(615)
+        # ax4.imshow(input_img_arr[10:13,:,:].transpose(1,2,0))
+        # ax5 = plt.subplot(616)
+        # ax5.imshow(input_img_arr[0,:,:])
+        # plt.show()
+        # print("getitem time consumeption:",time.time()-start)
+        return input_tensor,label_tensor,mask_tensor
+
+
     def _create_lists_filenames(self):
         '''Creates a list of filenames of images and labels each in dataset
         The label at index N will match the image at index N.
@@ -127,10 +216,17 @@ class SurfaceNormalsDataset(Dataset):
 
         #-- 5、verify number of every input
         if not (numRgbImages==numNorm_0==numLabels==numLabels):
+            print(numRgbImages,numNorm_0,numNorm_1,numNorm_2,numNorm_3,numMasks,numLabels)
             raise ValueError('Numbers of inputs(rgb,normal,label,mask) are different.')
 
-
-
+    def _activator_masks(self, images, augmenter, parents, default):
+        '''Used with imgaug to help only apply some augmentations to images and not labels
+        Eg: Blur is applied to input only, not label. However, resize is applied to both.
+        '''
+        if self.input_only and augmenter.name in self.input_only:
+            return False
+        else:
+            return default
 
 
 
@@ -139,7 +235,85 @@ class SurfaceNormalsDataset(Dataset):
 
 
 if(__name__ == '__main__'):
+    import matplotlib.pyplot as plt
+
+    from torch.utils.data import DataLoader
+    from torchvision import transforms
+    import torchvision
+
+    # Example Augmentations using imgaug
+    imsize = 512
+    augs_train = iaa.Sequential([
+        # Geometric Augs
+        iaa.Resize((imsize, imsize)), # Resize image
+        # iaa.Fliplr(0.5),
+        # iaa.Flipud(0.5),
+        # iaa.Rot90((0, 4)),
+
+        # Blur and Noise
+        #iaa.Sometimes(0.2, iaa.GaussianBlur(sigma=(0, 1.5), name="gaus-blur")),
+        #iaa.Sometimes(0.1, iaa.Grayscale(alpha=(0.0, 1.0), from_colorspace="RGB", name="grayscale")),
+        # iaa.Sometimes(0.2, iaa.AdditiveLaplaceNoise(scale=(0, 0.1*255), per_channel=True, name="gaus-noise")),
+
+        # Color, Contrast, etc.
+        #iaa.Sometimes(0.2, iaa.Multiply((0.75, 1.25), per_channel=0.1, name="brightness")),
+        # iaa.Sometimes(0.2, iaa.GammaContrast((0.7, 1.3), per_channel=0.1, name="contrast")),
+        # iaa.Sometimes(0.2, iaa.AddToHueAndSaturation((-20, 20), name="hue-sat")),
+        #iaa.Sometimes(0.3, iaa.Add((-20, 20), per_channel=0.5, name="color-jitter")),
+    ])
+    augs_test = iaa.Sequential([
+        # Geometric Augs
+        iaa.Resize((imsize, imsize), 0),
+    ])
+
+    augs = augs_train
+    input_only =  ["gaus-blur", "grayscale", "gaus-noise", "brightness", "contrast", "hue-sat", "color-jitter"]
     dt_train = SurfaceNormalsDataset(input_rgb_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/rgb-imgs',
                                      input_normal_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals',
                                      label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals',
-                                     mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks')
+                                     mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks',transform=augs_train,input_only=input_only)
+    print("dataset")
+    batch_size = 16
+    testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True,prefetch_factor=2)
+    print("dataloader")
+    # Show 1 Shuffled Batch of Images
+    for ii, batch in enumerate(testloader):
+        # Get Batch
+        img, label,mask = batch
+        print("ii:",ii)
+        print('image shape, type: ', img.shape, img.dtype)
+        print('label shape, type: ', label.shape, label.dtype)
+        print('mask shape, type: ', mask.shape, mask.dtype)
+        print(" ")
+        print(" ")
+
+        # # Show Batch
+        # sample = torch.cat((img[1:,:,:], label), 5)
+        # im_vis = torchvision.utils.make_grid(sample, nrow=batch_size // 4, padding=2, normalize=True, scale_each=True)
+        # plt.imshow(im_vis.numpy().transpose(1, 2, 0))
+        # plt.show()
+
+        # break
+
+
+
+    input_tensor, label_tensor,mask_tensor = dt_train.__getitem__(10)
+    input_img_arr = input_tensor.numpy()
+    label_img = label_tensor.numpy()
+    mask_img = mask_tensor.numpy()
+    fig = plt.figure()
+    ax0 = plt.subplot(241)
+    ax0.imshow(label_img.transpose(1,2,0))
+    ax1 = plt.subplot(245)
+    ax1.imshow(input_img_arr[1:4,:,:].transpose(1,2,0))
+    ax2 = plt.subplot(246)
+    ax2.imshow(input_img_arr[4:7,:,:].transpose(1,2,0))
+    ax3 = plt.subplot(247)
+    ax3.imshow(input_img_arr[7:10,:,:].transpose(1,2,0))
+    ax4 = plt.subplot(248)
+    ax4.imshow(input_img_arr[10:13,:,:].transpose(1,2,0))
+    ax5 = plt.subplot(242)
+    ax5.imshow(input_img_arr[0,:,:])
+    ax6 = plt.subplot(243)
+    ax6.imshow(mask_img)
+    plt.show()
