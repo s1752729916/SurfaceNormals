@@ -98,7 +98,16 @@ def scaledimg2floatimg(input_arr):
     '''
     output_arr = input_arr/255.0;
     return  output_arr
+def png_saver(PNG_PATH,nadrr):
+    '''Saves a numpy array as an png file with dtype of np.unit8
+    Args:
+        PNG_PATH (str): The path to which file will be saved, shape is (H x W x 3)
+        ndarr (ndarray): A numpy array containing img data
 
+    Returns:
+        None
+    '''
+    imageio.imwrite(PNG_PATH,nadrr)
 def exr_saver(EXR_PATH, ndarr, ndim=3):
     '''Saves a numpy array as an EXR file with HALF precision (float16)
     Args:

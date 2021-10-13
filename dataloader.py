@@ -63,7 +63,7 @@ class SurfaceNormalsDataset(Dataset):
         Returns:
             torch.Tensor: Tensor of input image, shape is (13, Height, Width), the 13 channels are (norm_0 x 3 , norm_1 x 3, norm_2 x 3, norm_3 x 3, intensity)
             torch.Tensor: Tensor of label (Tensor of zeroes is labels_dir is "" or None), the shape (3, Height, Width) for real norm
-            torch.Tensor: Tensor of mask
+            torch.Tensor: Tensor of mask ( The shape (3, 1, Height, Width) for real norm
         '''
         #-- 1、prepare paths
         # all_time = time.time()
@@ -128,7 +128,7 @@ class SurfaceNormalsDataset(Dataset):
 
         input_tensor = transforms.ToTensor()(input_img_arr.copy().transpose(1,2,0))  #ToTensor contains the normalization process
         label_tensor = transforms.ToTensor()(label_img.copy().transpose(1,2,0))
-        mask_tensor = torch.from_numpy(mask_img)
+        mask_tensor = torch.from_numpy(mask_img).unsqueeze(0)
 
         # print("normalize time",time.time()-start)
         # print("total time:" ,time.time()-all_time)
@@ -279,11 +279,11 @@ if(__name__ == '__main__'):
                                      input_normal_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/synthesis-normals',
                                      label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/camera-normals',
                                      mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/segmentation-masks',transform=augs_train,input_only=input_only)
-    print("dataset")
-    batch_size = 16
-    testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True,prefetch_factor=2)
-    print("dataloader")
-    # Show 1 Shuffled Batch of Images
+    # print("dataset")
+    # batch_size = 16
+    # testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=16, drop_last=True,prefetch_factor=16)
+    # print("dataloader")
+    # # Show 1 Shuffled Batch of Images
     # for ii, batch in enumerate(testloader):
     #     # Get Batch
     #     img, label,mask = batch
@@ -301,6 +301,8 @@ if(__name__ == '__main__'):
     #     # plt.show()
     #
     #     # break
+
+    import loss_functions
 
 
 
@@ -322,6 +324,15 @@ if(__name__ == '__main__'):
     ax5 = plt.subplot(242)
     ax5.imshow(input_img_arr[0,:,:])
     ax6 = plt.subplot(243)
+    ax6.imshow(mask_img.squeeze(0))
+    print(len(np.where(mask_img > 0)[1]))
+
     print(mask_img.shape)
-    ax6.imshow(mask_img)
+
+    print('loss',loss_functions.loss_fn_cosine(input_vec=input_tensor[4:7, :, :].unsqueeze(0),
+                                    target_vec=label_tensor.unsqueeze(0),
+                                    mask_tensor = mask_tensor.unsqueeze(0),
+                                    reduction='elementwise_mean'))
+
+
     plt.show()
