@@ -66,6 +66,7 @@ class SurfaceNormalsDataset(Dataset):
             torch.Tensor: Tensor of mask
         '''
         #-- 1、prepare paths
+        # all_time = time.time()
         rgb_img_path = self._datalist_input_rgb[index]
         norm_0_path = self._datalist_input_normal_0[index]
         norm_1_path = self._datalist_input_normal_1[index]
@@ -73,26 +74,22 @@ class SurfaceNormalsDataset(Dataset):
         norm_3_path = self._datalist_input_normal_3[index]
         mask_path = self._datalist_mask[index]
         label_path = self._datalist_label[index]
-
+        # start = time.time()
         #-- 2、load imgs
         rgb_img = imageio.imread(rgb_img_path)  # numpy array shape is (height, width, 3)
         grey_img = API.utils.rgb2grey(rgb_img)  # numpy array shape is (height, width)
-        norm_0 = API.utils.exr_loader(norm_0_path)  #numpy array shape is (height, width, 3)
-        norm_0 = API.utils.normal_to_rgb(norm_0)
-        norm_1 = API.utils.exr_loader(norm_1_path)
-        norm_1 = API.utils.normal_to_rgb(norm_1)
-        norm_2 = API.utils.exr_loader(norm_2_path)
-        norm_2 = API.utils.normal_to_rgb(norm_2)
-        norm_3 = API.utils.exr_loader(norm_3_path)
-        norm_3 = API.utils.normal_to_rgb(norm_3)
+        norm_0 = API.utils.rgb_loader(norm_0_path)  #numpy array shape is (height, width, 3)
+        norm_1 = API.utils.rgb_loader(norm_1_path)
+        norm_2 = API.utils.rgb_loader(norm_2_path)
+        norm_3 = API.utils.rgb_loader(norm_3_path)
         mask_img = API.utils.mask_loader(mask_path)
-        label_img = API.utils.exr_loader(label_path)
-        label_img = API.utils.normal_to_rgb(label_img).transpose(2,0,1)  # To Shape (3 x H x W)
+        label_img = API.utils.rgb_loader(label_path).transpose(2,0,1)
+        # print("load time",time.time()-start)
 
 
 
        #-- 3、concat inputs
-        start = time.time()
+        # start = time.time()
         height = grey_img.shape[0]
         width = grey_img.shape[1]
         input_img_arr = numpy.zeros([13,height,width],dtype = np.uint8)    #  shape is (13 x H x W)
@@ -101,12 +98,18 @@ class SurfaceNormalsDataset(Dataset):
         input_img_arr[4:7,:,:] = norm_1.transpose(2,0,1)
         input_img_arr[7:10,:,:] = norm_2.transpose(2,0,1)
         input_img_arr[10:13,:,:] = norm_3.transpose(2,0,1)
+        # print("concat time",time.time()-start)
 
         #-- 5、apply mask to inputs and label
+        # start = time.time()
         input_img_arr[:,mask_img==0] = 0
         label_img[:,mask_img==0] = 0
 
+        # print("apply mask time",time.time()-start)
+
         #-- 4、apply image augmentations
+        # start = time.time()
+
         if self.transform:
             # apply augment to inputs
             det_tf = self.transform.to_deterministic()
@@ -118,13 +121,17 @@ class SurfaceNormalsDataset(Dataset):
             label_img = label_img.transpose(2,0,1)
             # apply mask
             mask_img = det_tf.augment_image(mask_img, hooks=ia.HooksImages(activator=self._activator_masks))  # some transforms only appy to inputs, not label
+        # print("augmentation time",time.time()-start)
 
         #-- 4、normalize
+        # start = time.time()
+
         input_tensor = transforms.ToTensor()(input_img_arr.copy().transpose(1,2,0))  #ToTensor contains the normalization process
         label_tensor = transforms.ToTensor()(label_img.copy().transpose(1,2,0))
         mask_tensor = torch.from_numpy(mask_img)
 
-
+        # print("normalize time",time.time()-start)
+        # print("total time:" ,time.time()-all_time)
         # print("input shape:",input_tensor.shape)
         # print("label_tensor:",label_tensor.shape)
         # print("mask_tensor:",mask_tensor.shape)
@@ -170,28 +177,28 @@ class SurfaceNormalsDataset(Dataset):
         
         #-- 2、input normal images
         input_normal_0_search_str = os.path.join(self.input_norm_dir,'synthesis-normal-0')
-        input_normal_0_search_str = os.path.join(input_normal_0_search_str,'*-synthsis-normal.exr')
+        input_normal_0_search_str = os.path.join(input_normal_0_search_str,'*-synthsis-normal.png')
         self._datalist_input_normal_0 = sorted(glob.glob(input_normal_0_search_str))
         numNorm_0 = len(self._datalist_input_normal_0)
         if numNorm_0 == 0:
             raise ValueError('No input normal_0 files found in given directory. Searched in dir: {} '.format(input_normal_0_search_str))
 
         input_normal_1_search_str = os.path.join(self.input_norm_dir,'synthesis-normal-1')
-        input_normal_1_search_str = os.path.join(input_normal_1_search_str,'*-synthsis-normal.exr')
+        input_normal_1_search_str = os.path.join(input_normal_1_search_str,'*-synthsis-normal.png')
         self._datalist_input_normal_1 = sorted(glob.glob(input_normal_1_search_str))
         numNorm_1 = len(self._datalist_input_normal_1)
         if numNorm_1 == 0:
             raise ValueError('No input normal_1 files found in given directory. Searched in dir: {} '.format(input_normal_1_search_str))
 
         input_normal_2_search_str = os.path.join(self.input_norm_dir,'synthesis-normal-2')
-        input_normal_2_search_str = os.path.join(input_normal_2_search_str,'*-synthsis-normal.exr')
+        input_normal_2_search_str = os.path.join(input_normal_2_search_str,'*-synthsis-normal.png')
         self._datalist_input_normal_2 = sorted(glob.glob(input_normal_2_search_str))
         numNorm_2 = len(self._datalist_input_normal_2)
         if numNorm_2 == 0:
             raise ValueError('No input normal_2 files found in given directory. Searched in dir: {} '.format(input_normal_2_search_str))
 
         input_normal_3_search_str = os.path.join(self.input_norm_dir,'synthesis-normal-3')
-        input_normal_3_search_str = os.path.join(input_normal_3_search_str,'*-synthsis-normal.exr')
+        input_normal_3_search_str = os.path.join(input_normal_3_search_str,'*-synthsis-normal.png')
         self._datalist_input_normal_3 = sorted(glob.glob(input_normal_3_search_str))
         numNorm_3 = len(self._datalist_input_normal_3)
         if numNorm_3 == 0:
@@ -200,7 +207,7 @@ class SurfaceNormalsDataset(Dataset):
             raise ValueError('Numbers of input normals are different.')
 
         #-- 3、labels(real normals)
-        labels_search_str = os.path.join(self.labels_dir,'*-cameraNormals.exr')
+        labels_search_str = os.path.join(self.labels_dir,'*-cameraNormals.png')
         self._datalist_label = sorted(glob.glob(labels_search_str))
         numLabels = len(self._datalist_label)
         if numLabels==0:
@@ -268,15 +275,15 @@ if(__name__ == '__main__'):
 
     augs = augs_train
     input_only =  ["gaus-blur", "grayscale", "gaus-noise", "brightness", "contrast", "hue-sat", "color-jitter"]
-    dt_train = SurfaceNormalsDataset(input_rgb_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/rgb-imgs',
-                                     input_normal_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals',
-                                     label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals',
-                                     mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks',transform=augs_train,input_only=input_only)
-    # print("dataset")
-    # batch_size = 16
-    # testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True,prefetch_factor=2)
-    # print("dataloader")
-    # # Show 1 Shuffled Batch of Images
+    dt_train = SurfaceNormalsDataset(input_rgb_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/rgb-imgs',
+                                     input_normal_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/synthesis-normals',
+                                     label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/camera-normals',
+                                     mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/segmentation-masks',transform=augs_train,input_only=input_only)
+    print("dataset")
+    batch_size = 16
+    testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True,prefetch_factor=2)
+    print("dataloader")
+    # Show 1 Shuffled Batch of Images
     # for ii, batch in enumerate(testloader):
     #     # Get Batch
     #     img, label,mask = batch
