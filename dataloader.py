@@ -128,7 +128,7 @@ class SurfaceNormalsDataset(Dataset):
 
         input_tensor = transforms.ToTensor()(input_img_arr.copy().transpose(1,2,0))  #ToTensor contains the normalization process
         label_tensor = transforms.ToTensor()(label_img.copy().transpose(1,2,0))
-        mask_tensor = torch.from_numpy(mask_img).unsqueeze(0)
+        mask_tensor = torch.from_numpy(mask_img.copy()).unsqueeze(0)
 
         # print("normalize time",time.time()-start)
         # print("total time:" ,time.time()-all_time)
@@ -151,6 +151,7 @@ class SurfaceNormalsDataset(Dataset):
         # ax5.imshow(input_img_arr[0,:,:])
         # plt.show()
         # print("getitem time consumeption:",time.time()-start)
+        # print("label_tensor shape:",label_tensor.shape)
         return input_tensor,label_tensor,mask_tensor
 
 
@@ -279,28 +280,33 @@ if(__name__ == '__main__'):
                                      input_normal_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/synthesis-normals',
                                      label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/camera-normals',
                                      mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/segmentation-masks',transform=augs_train,input_only=input_only)
-    # print("dataset")
-    # batch_size = 16
-    # testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=16, drop_last=True,prefetch_factor=16)
-    # print("dataloader")
-    # # Show 1 Shuffled Batch of Images
-    # for ii, batch in enumerate(testloader):
-    #     # Get Batch
-    #     img, label,mask = batch
-    #     print("ii:",ii)
-    #     print('image shape, type: ', img.shape, img.dtype)
-    #     print('label shape, type: ', label.shape, label.dtype)
-    #     print('mask shape, type: ', mask.shape, mask.dtype)
-    #     print(" ")
-    #     print(" ")
-    #
-    #     # # Show Batch
-    #     # sample = torch.cat((img[1:,:,:], label), 5)
-    #     # im_vis = torchvision.utils.make_grid(sample, nrow=batch_size // 4, padding=2, normalize=True, scale_each=True)
-    #     # plt.imshow(im_vis.numpy().transpose(1, 2, 0))
-    #     # plt.show()
-    #
-    #     # break
+    print("dataset")
+    batch_size = 16
+    testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=8, drop_last=True,prefetch_factor=2)
+    print("dataloader")
+    # Show 1 Shuffled Batch of Images
+    import loss_functions
+    for ii, batch in enumerate(testloader):
+        # Get Batch
+        input_tensor, label_tensor,mask_tensor = batch
+        print("ii:",ii)
+
+        print(" ")
+        print(" ")
+        print("input_vec:", input_tensor[4:7, :, :].shape)
+        print("target_vec:", label_tensor.shape)
+        print("mask_vec:", mask_tensor.squeeze(1).shape)
+        print('loss', loss_functions.loss_fn_cosine(input_vec=input_tensor[:,4:7, :, :],
+                                                    target_vec=label_tensor,
+                                                    mask_tensor=mask_tensor.squeeze(1),
+                                                    reduction='elementwise_mean'))
+        # # Show Batch
+        # sample = torch.cat((img[1:,:,:], label), 5)
+        # im_vis = torchvision.utils.make_grid(sample, nrow=batch_size // 4, padding=2, normalize=True, scale_each=True)
+        # plt.imshow(im_vis.numpy().transpose(1, 2, 0))
+        # plt.show()
+
+        # break
 
     import loss_functions
 
@@ -328,7 +334,9 @@ if(__name__ == '__main__'):
     print(len(np.where(mask_img > 0)[1]))
 
     print(mask_img.shape)
-
+    print("input_vec:",input_tensor[4:7,:,:].unsqueeze(0).shape)
+    print("target_vec:",label_tensor.unsqueeze(0).shape)
+    print("mask_vec:",mask_tensor.unsqueeze(0).shape)
     print('loss',loss_functions.loss_fn_cosine(input_vec=input_tensor[4:7, :, :].unsqueeze(0),
                                     target_vec=label_tensor.unsqueeze(0),
                                     mask_tensor = mask_tensor.unsqueeze(0),

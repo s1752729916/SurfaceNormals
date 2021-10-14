@@ -15,7 +15,7 @@ import torch.nn as nn
 from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader,SubsetRandomSampler
 from torchvision import transforms
-
+from tqdm import tqdm
 from modeling import deeplab
 import dataloader
 import loss_functions
@@ -31,10 +31,11 @@ label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-datase
 mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks'
 imgHeight = 512
 imgWidth = 512
-batch_size = 16
-num_workers = 16
+batch_size = 8
+num_workers = 2
 validation_split = 0.2
 shuffle_dataset = True
+pin_memory = False
 
 #-- 2、create dataset
 augs_train = iaa.Sequential([
@@ -83,19 +84,20 @@ trainLoader = DataLoader(dataset,
                          batch_size=batch_size,
                          num_workers=num_workers,
                          drop_last=True,
-                         pin_memory=True,sampler=train_sampler)
+                         pin_memory=pin_memory,sampler=train_sampler)
 testLoader = DataLoader(dataset,
                          batch_size=batch_size,
                          num_workers=num_workers,
                          drop_last=True,
-                         pin_memory=True,sampler=valid_sampler)
+                         pin_memory=pin_memory,sampler=valid_sampler)
 print("trainLoader size:",trainLoader.__len__()*trainLoader.batch_size)
 print("testLoader size:",testLoader.__len__()*testLoader.batch_size)
 
 ###################### ModelBuilder #############################
 
 #-- 1、 config parameters
-backbone_model = 'drn'
+backbone_model = 'resnet50'
+
 sync_bn = False  # this is for Multi-GPU synchronize batch normalization
 numClasses = 3
 
@@ -107,6 +109,7 @@ model = deeplab.DeepLab(num_classes=numClasses,
 
 #-- 3、Enable GPU for training
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 model = model.to(device)
 
 
@@ -166,3 +169,30 @@ for epoch in range(0,MAX_EPOCH):
     print('\n\nEpoch {}/{}'.format(epoch, MAX_EPOCH - 1))
     print('-' * 30)
     print("train")
+    model.train()  # set model mode to train mode
+
+    running_loss = 0.0
+    running_mean = 0
+    running_median = 0
+
+    for iter_num,batch  in enumerate(tqdm(trainLoader)):
+        inputs_t, label_t,mask_t = batch
+        inputs_t = inputs_t.to(device)
+        label_t = label_t.to(device)
+        print("inputs shape:",inputs_t.shape)
+        print("label shape:",label_t.shape)
+        # Forward + Backward Prop
+        optimizer.zero_grad()
+        torch.set_grad_enabled(True)
+        normal_vectors = model(inputs_t)
+        normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
+        loss = criterion(normal_vectors_norm, label_t.double(), mask_t.squeeze(1),reduction='sum')
+        loss /= batch_size
+        loss.backward()
+        optimizer.step()
+
+
+        running_loss += loss.item()
+
+
+    print("running loss:",running_loss)

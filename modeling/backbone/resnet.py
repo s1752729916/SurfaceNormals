@@ -58,7 +58,7 @@ class ResNet(nn.Module):
             raise NotImplementedError
 
         # Modules
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
+        self.conv1 = nn.Conv2d(13, 64, kernel_size=7, stride=2, padding=3,
                                 bias=False)
         self.bn1 = BatchNorm(64)
         self.relu = nn.ReLU(inplace=True)
@@ -152,11 +152,18 @@ def ResNet101(output_stride, BatchNorm, pretrained=True):
     """
     model = ResNet(Bottleneck, [3, 4, 23, 3], output_stride, BatchNorm, pretrained=pretrained)
     return model
+def ResNet50(output_stride, BatchNorm, pretrained=True):
+    """Constructs a ResNet-101 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = ResNet(Bottleneck, [3, 4, 6, 3], output_stride, BatchNorm, pretrained=pretrained)
+    return model
 
 if __name__ == "__main__":
     import torch
-    model = ResNet101(BatchNorm=nn.BatchNorm2d, pretrained=True, output_stride=8)
-    input = torch.rand(1, 3, 512, 512)
+    model = ResNet50(BatchNorm=nn.BatchNorm2d, pretrained=False, output_stride=8)
+    input = torch.rand(1, 13, 512, 512)
     output, low_level_feat = model(input)
     print(output.size())
     print(low_level_feat.size())
