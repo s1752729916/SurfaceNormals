@@ -280,33 +280,41 @@ if(__name__ == '__main__'):
                                      input_normal_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/synthesis-normals',
                                      label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/camera-normals',
                                      mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/segmentation-masks',transform=augs_train,input_only=input_only)
-    print("dataset")
-    batch_size = 16
-    testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=8, drop_last=True,prefetch_factor=2)
-    print("dataloader")
-    # Show 1 Shuffled Batch of Images
-    import loss_functions
-    for ii, batch in enumerate(testloader):
-        # Get Batch
-        input_tensor, label_tensor,mask_tensor = batch
-        print("ii:",ii)
-
-        print(" ")
-        print(" ")
-        print("input_vec:", input_tensor[4:7, :, :].shape)
-        print("target_vec:", label_tensor.shape)
-        print("mask_vec:", mask_tensor.squeeze(1).shape)
-        print('loss', loss_functions.loss_fn_cosine(input_vec=input_tensor[:,4:7, :, :],
-                                                    target_vec=label_tensor,
-                                                    mask_tensor=mask_tensor.squeeze(1),
-                                                    reduction='elementwise_mean'))
-        # # Show Batch
-        # sample = torch.cat((img[1:,:,:], label), 5)
-        # im_vis = torchvision.utils.make_grid(sample, nrow=batch_size // 4, padding=2, normalize=True, scale_each=True)
-        # plt.imshow(im_vis.numpy().transpose(1, 2, 0))
-        # plt.show()
-
-        # break
+    # print("dataset")
+    # batch_size = 16
+    # testloader = DataLoader(dt_train, batch_size=batch_size, shuffle=True, num_workers=8, drop_last=True,prefetch_factor=2)
+    # print("dataloader")
+    # # Show 1 Shuffled Batch of Images
+    # import loss_functions
+    # for ii, batch in enumerate(testloader):
+    #     # Get Batch
+    #     input_tensor, label_tensor,mask_tensor = batch
+    #     print("ii:",ii)
+    #
+    #     print(" ")
+    #     print(" ")
+    #     print("input_vec:", input_tensor[4:7, :, :].shape)
+    #     print("target_vec:", label_tensor.shape)
+    #     print("mask_vec:", mask_tensor.squeeze(1).shape)
+    #     print('loss', loss_functions.loss_fn_cosine(input_vec=input_tensor[:,10:13, :, :],
+    #                                                 target_vec=label_tensor,
+    #                                                 mask_tensor=mask_tensor.squeeze(1),
+    #                                                 reduction='elementwise_mean'))
+    #     loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
+    #         input_tensor[:,4:7, :, :], label_tensor.double(), mask_tensor.squeeze(1))
+    #     print("loss_deg_mean:",loss_deg_mean)
+    #     print("loss_deg_median:",loss_deg_median)
+    #     print("percentage_1:",percentage_1)
+    #     print("percentage_2:",percentage_2)
+    #     print("percentage_3:",percentage_3)
+    #
+    #     # # Show Batch
+    #     # sample = torch.cat((img[1:,:,:], label), 5)
+    #     # im_vis = torchvision.utils.make_grid(sample, nrow=batch_size // 4, padding=2, normalize=True, scale_each=True)
+    #     # plt.imshow(im_vis.numpy().transpose(1, 2, 0))
+    #     # plt.show()
+    #
+    #     # break
 
     import loss_functions
 
@@ -331,16 +339,21 @@ if(__name__ == '__main__'):
     ax5.imshow(input_img_arr[0,:,:])
     ax6 = plt.subplot(243)
     ax6.imshow(mask_img.squeeze(0))
-    print(len(np.where(mask_img > 0)[1]))
-
+    print("mask_valid:_nums:",len(np.where(mask_img > 0)[1]))
     print(mask_img.shape)
     print("input_vec:",input_tensor[4:7,:,:].unsqueeze(0).shape)
     print("target_vec:",label_tensor.unsqueeze(0).shape)
     print("mask_vec:",mask_tensor.unsqueeze(0).shape)
-    print('loss',loss_functions.loss_fn_cosine(input_vec=input_tensor[4:7, :, :].unsqueeze(0),
+    print('loss',loss_functions.loss_fn_cosine(input_vec=input_tensor[10:13, :, :].unsqueeze(0),
                                     target_vec=label_tensor.unsqueeze(0),
-                                    mask_tensor = mask_tensor.unsqueeze(0),
+                                    mask_tensor = mask_tensor.unsqueeze(0).squeeze(1),
                                     reduction='elementwise_mean'))
-
+    loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
+        input_tensor[10:13, :, :].unsqueeze(0), label_tensor.double().unsqueeze(0), mask_tensor.unsqueeze(0).squeeze(1))
+    print("loss_deg_mean:", loss_deg_mean)
+    print("loss_deg_median:", loss_deg_median)
+    print("percentage_1:", percentage_1)
+    print("percentage_2:", percentage_2)
+    print("percentage_3:", percentage_3)
 
     plt.show()

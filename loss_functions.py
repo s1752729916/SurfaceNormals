@@ -64,7 +64,7 @@ def metric_calculator_batch(input_vec, target_vec, mask=None):
                              This should be GROUND TRUTH vector.
                              The dimensions are expected to be (batchSize, 3, height, width).
         mask (tensor): The pixels over which loss is to be calculated. Represents VALID pixels.
-                             The dimensions are expected to be (batchSize, 3, height, width).
+                             The dimensions are expected to be (batchSize, height, width).
     Returns:
         float: The mean error in 2 surface normals in degrees
         float: The median error in 2 surface normals in degrees
@@ -78,10 +78,15 @@ def metric_calculator_batch(input_vec, target_vec, mask=None):
         raise ValueError('Shape of tensor must be [B, C, H, W]. Got shape: {}'.format(target_vec.shape))
 
     INVALID_PIXEL_VALUE = 0  # All 3 channels should have this value
-    mask_valid_pixels = ~(torch.all(target_vec == INVALID_PIXEL_VALUE, dim=1))
     if mask is not None:
-        mask_valid_pixels = (mask_valid_pixels.float() * mask).byte()
+        mask_valid_pixels = ~(torch.all(mask==0,dim=0))
+        mask_valid_pixels = mask_valid_pixels.unsqueeze(0)
+    else :
+        mask_valid_pixels = ~(torch.all(target_vec == INVALID_PIXEL_VALUE, dim=1))
+
+
     total_valid_pixels = mask_valid_pixels.sum()
+    print("total_valid_pixels:",total_valid_pixels)
     if (total_valid_pixels == 0):
         print('[WARN]: Image found with ZERO valid pixels to calc metrics')
         return torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0), mask_valid_pixels
@@ -96,7 +101,7 @@ def metric_calculator_batch(input_vec, target_vec, mask=None):
     loss_deg = loss_rad * (180.0 / math.pi)
 
     # Mask out all invalid pixels and calc mean, median
-    loss_deg = loss_deg[mask_valid_pixels]
+    loss_deg = loss_deg[mask_valid_pixels.bool()]
     loss_deg_mean = loss_deg.mean()
     loss_deg_median = loss_deg.median()
 
