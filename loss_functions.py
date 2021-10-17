@@ -9,7 +9,7 @@ import numpy as np
 
 
 
-def loss_fn_cosine(input_vec, target_vec,mask_tensor, reduction='sum'):
+def loss_fn_cosine(input_vec, target_vec,mask_tensor = None, reduction='sum'):
     '''A cosine loss function for use with surface normals estimation.
     Calculates the cosine loss between 2 vectors. Both should be of the same size.
     Arguments:
@@ -34,13 +34,12 @@ def loss_fn_cosine(input_vec, target_vec,mask_tensor, reduction='sum'):
 
     # calculate loss only on valid pixels
     # mask_invalid_pixels = (target_vec[:, 0, :, :] == -1.0) & (target_vec[:, 1, :, :] == -1.0) & (target_vec[:, 2, :, :] == -1.0)
-    # mask_invalid_pixels = torch.all(target_vec == 0, dim=1)
-    mask_invalid_pixels = torch.all(mask_tensor==0,dim=0)
-
-    loss_cos[:,mask_invalid_pixels] = 0.0
+    mask_invalid_pixels = torch.all(target_vec == 0, dim=1)
+    # mask_invalid_pixels = torch.all(mask_tensor==0,dim=)
+    loss_cos[mask_invalid_pixels] = 0.0
     loss_cos_sum = loss_cos.sum()
     total_valid_pixels = (~mask_invalid_pixels).sum()
-
+    print(total_valid_pixels)
 
     error_output = loss_cos_sum / total_valid_pixels
     if reduction == 'elementwise_mean':
@@ -78,11 +77,8 @@ def metric_calculator_batch(input_vec, target_vec, mask=None):
         raise ValueError('Shape of tensor must be [B, C, H, W]. Got shape: {}'.format(target_vec.shape))
 
     INVALID_PIXEL_VALUE = 0  # All 3 channels should have this value
-    if mask is not None:
-        mask_valid_pixels = ~(torch.all(mask==0,dim=0))
-        mask_valid_pixels = mask_valid_pixels.unsqueeze(0)
-    else :
-        mask_valid_pixels = ~(torch.all(target_vec == INVALID_PIXEL_VALUE, dim=1))
+
+    mask_valid_pixels = ~(torch.all(target_vec == INVALID_PIXEL_VALUE, dim=1))
 
 
     total_valid_pixels = mask_valid_pixels.sum()

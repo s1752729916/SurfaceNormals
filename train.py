@@ -168,7 +168,6 @@ MAX_EPOCH = 50
 for epoch in range(0,MAX_EPOCH):
     print('\n\nEpoch {}/{}'.format(epoch, MAX_EPOCH - 1))
     print('-' * 30)
-    print("train")
     model.train()  # set model mode to train mode
 
     running_loss = 0.0
@@ -179,20 +178,29 @@ for epoch in range(0,MAX_EPOCH):
         inputs_t, label_t,mask_t = batch
         inputs_t = inputs_t.to(device)
         label_t = label_t.to(device)
-        print("inputs shape:",inputs_t.shape)
-        print("label shape:",label_t.shape)
+        print('')
         # Forward + Backward Prop
         optimizer.zero_grad()
         torch.set_grad_enabled(True)
         normal_vectors = model(inputs_t)
         normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
-        loss = criterion(normal_vectors_norm, label_t.double(), mask_t.squeeze(1),reduction='sum')
+        inputs_t = inputs_t.detach().cpu()
+        label_t = label_t.detach().cpu()
+        mask_t = mask_t.squeeze(1)  # To shape (batchSize, Height, Width)
+        loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum')
         loss /= batch_size
         loss.backward()
         optimizer.step()
 
-
+        # calcute metrics
+        loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
+            normal_vectors_norm, label_t.double())
+        running_mean += loss_deg_mean.item()
+        running_median += loss_deg_median.item()
         running_loss += loss.item()
+        print('loss_deg_mean:',loss_deg_mean)
+        print('loss_deg_median:',loss_deg_median)
 
-
-    print("running loss:",running_loss)
+    print("train running loss:",running_loss)
+    print("train running mean:",running_mean)
+    print("train running median:",running_median)

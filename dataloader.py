@@ -344,12 +344,12 @@ if(__name__ == '__main__'):
     print("input_vec:",input_tensor[4:7,:,:].unsqueeze(0).shape)
     print("target_vec:",label_tensor.unsqueeze(0).shape)
     print("mask_vec:",mask_tensor.unsqueeze(0).shape)
-    print('loss',loss_functions.loss_fn_cosine(input_vec=input_tensor[10:13, :, :].unsqueeze(0),
+    print('loss',loss_functions.loss_fn_cosine(input_vec=input_tensor[1:4, :, :].unsqueeze(0),
                                     target_vec=label_tensor.unsqueeze(0),
                                     mask_tensor = mask_tensor.unsqueeze(0).squeeze(1),
                                     reduction='elementwise_mean'))
     loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
-        input_tensor[10:13, :, :].unsqueeze(0), label_tensor.double().unsqueeze(0), mask_tensor.unsqueeze(0).squeeze(1))
+        input_tensor[1:4, :, :].unsqueeze(0), label_tensor.double().unsqueeze(0))
     print("loss_deg_mean:", loss_deg_mean)
     print("loss_deg_median:", loss_deg_median)
     print("percentage_1:", percentage_1)
