@@ -204,3 +204,4 @@ for epoch in range(0,MAX_EPOCH):
     print("train running loss:",running_loss)
     print("train running mean:",running_mean)
     print("train running median:",running_median)
+
