@@ -4,8 +4,10 @@ import errno
 import glob
 import io
 import os
+import sys
 import random
 import shutil
+from termcolor import colored
 
 import imgaug as ia
 import numpy as np
@@ -32,7 +34,7 @@ imgHeight = 512
 imgWidth = 512
 batch_size = 8
 num_workers = 4
-validation_split = 0.9
+validation_split = 0.1
 shuffle_dataset = True
 pin_memory = False
 prefetch_factor = 1
@@ -81,8 +83,8 @@ train_indices, val_indices = indices[split:], indices[:split]
 train_sampler = SubsetRandomSampler(train_indices)
 valid_sampler = SubsetRandomSampler(val_indices)
 trainLoader = DataLoader(dataset,
-                         batch_size=batch_size,
                          num_workers=num_workers,
+                         batch_size=batch_size,
                          drop_last=True,
                          pin_memory=pin_memory,sampler=train_sampler,prefetch_factor  = prefetch_factor)
 testLoader = DataLoader(dataset,
@@ -161,12 +163,56 @@ criterion = loss_functions.loss_fn_cosine
 
 
 ###################### Train Model #############################
-#-- 1、 config parameters
+#-- 1、config parameters
 MAX_EPOCH = 20
+saveModelInterval = 1
+CHECKPOINT_DIR = '/home/zjw/smq/SurfaceNormals/CheckPoints'
+total_iter_num = 0
+START_EPOCH = 0
+continue_train = False
+preCheckPoint = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0002.pth')
 
-#-- 2、epoch cycle
+#-- 2、load check point
+if(continue_train):
+    print(colored('Continuing training from checkpoint...Loaded data from checkpoint:', 'green'))
+    if not os.path.isfile(preCheckPoint):
+        raise ValueError('Invalid path to the given weights file for transfer learning.\
+                The file {} does not exist'.format(preCheckPoint))
+    CHECKPOINT = torch.load(preCheckPoint, map_location='cpu')
+    if 'model_state_dict' in CHECKPOINT:
+        # Our weights file with various dicts
+        model.load_state_dict(CHECKPOINT['model_state_dict'])
+    elif 'state_dict' in CHECKPOINT:
+        # Original Author's checkpoint
+        CHECKPOINT['state_dict'].pop('decoder.last_conv.8.weight')
+        CHECKPOINT['state_dict'].pop('decoder.last_conv.8.bias')
+        model.load_state_dict(CHECKPOINT['state_dict'], strict=False)
+    else:
+        # Our old checkpoint containing only model's state_dict()
+        model.load_state_dict(CHECKPOINT)
+
+    if continue_train and preCheckPoint:
+        if 'optimizer_state_dict' in CHECKPOINT:
+            optimizer.load_state_dict(CHECKPOINT['optimizer_state_dict'])
+        else:
+            print(
+                colored(
+                    'WARNING: Could not load optimizer state from checkpoint as checkpoint does not contain ' +
+                    '"optimizer_state_dict". Continuing without loading optimizer state. ', 'red'))
+    if continue_train and preCheckPoint:
+        if 'model_state_dict' in CHECKPOINT:
+            # TODO: remove this second check for 'model_state_dict' soon. Kept for ensuring backcompatibility
+            total_iter_num = CHECKPOINT['total_iter_num'] + 1
+            START_EPOCH = CHECKPOINT['epoch'] + 1
+            END_EPOCH = CHECKPOINT['epoch'] + MAX_EPOCH
+        else:
+            print(
+                colored(
+                    'Could not load epoch and total iter nums from checkpoint, they do not exist in checkpoint.\
+                           Starting from epoch num 0', 'red'))
+#-- 3、epoch cycle
 import time
-for epoch in range(0,MAX_EPOCH):
+for epoch in range(START_EPOCH,MAX_EPOCH):
     print('\n\nEpoch {}/{}'.format(epoch, MAX_EPOCH - 1))
     print('-' * 30)
 
@@ -180,6 +226,7 @@ for epoch in range(0,MAX_EPOCH):
     running_median = 0
     for iter_num,batch  in enumerate(tqdm(trainLoader)):
         print('')
+        total_iter_num+=1
         inputs_t, label_t,mask_t = batch
         inputs_t = inputs_t.to(device)
         label_t = label_t.to(device)
@@ -209,9 +256,29 @@ for epoch in range(0,MAX_EPOCH):
         print('loss_deg_mean:',loss_deg_mean)
         print('loss_deg_median:',loss_deg_median)
     num_samples = (len(trainLoader))
-    print("train running loss:",running_loss/num_samples)
+    epoch_loss = running_loss/num_samples
+    print("train running loss:",epoch_loss)
     print("train running mean:",running_mean/num_samples)
     print("train running median:",running_median/num_samples)
+
+
+    # save the model check point every N epoch
+    if epoch % saveModelInterval==0:
+        filename = os.path.join(CHECKPOINT_DIR,'check-point-epoch-{:04d}.pth'.format(epoch))
+        if torch.cuda.device_count() > 1:
+            model_params = model.module.state_dict()  # Saving nn.DataParallel model
+        else:
+            model_params = model.state_dict()
+        torch.save(
+            {
+                'model_state_dict': model_params,
+                'optimizer_state_dict': optimizer.state_dict(),
+                'epoch': epoch,
+                'total_iter_num': total_iter_num,
+                'epoch_loss': epoch_loss,
+            }, filename)
+
+
 
     ###################### Validation Cycle #############################
     print('\nValidation:')
@@ -244,6 +311,8 @@ for epoch in range(0,MAX_EPOCH):
         running_mean += loss_deg_mean.item()
         running_median += loss_deg_median.item()
         running_loss += loss.item()
+
+
     num_samples = len(testLoader)
     print("test running loss:",running_loss/num_samples)
     print("test running mean:",running_mean/num_samples)
