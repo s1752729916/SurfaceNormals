@@ -7,7 +7,6 @@ import os
 import random
 import shutil
 
-import cv2
 import imgaug as ia
 import numpy as np
 import torch
@@ -25,17 +24,18 @@ import loss_functions
 
 #-- 1、 config parameters
 
-input_rgb_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/rgb-imgs'
+input_rgb_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-trainb-imgs'
 input_normal_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals'
 label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals'
-mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks'
+mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-traingmentation-masks'
 imgHeight = 512
 imgWidth = 512
 batch_size = 8
-num_workers = 2
+num_workers = 4
 validation_split = 0.2
 shuffle_dataset = True
 pin_memory = False
+prefetch_factor = 1
 
 #-- 2、create dataset
 augs_train = iaa.Sequential([
@@ -60,10 +60,10 @@ input_only = [
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
 dataset = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/rgb-imgs',
-    input_normal_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/synthesis-normals',
-    label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/camera-normals',
-    mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/segmentation-masks',
+    input_rgb_dir='/homew/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-trainb-imgs',
+    input_normal_dir='/homew/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals',
+    label_dir='/homew/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals',
+    mask_dir='/homew/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-traingmentation-masks',
     transform=augs_train, input_only=input_only)
 print("number of dataset: ",dataset.__len__())
 
@@ -84,12 +84,12 @@ trainLoader = DataLoader(dataset,
                          batch_size=batch_size,
                          num_workers=num_workers,
                          drop_last=True,
-                         pin_memory=pin_memory,sampler=train_sampler)
+                         pin_memory=pin_memory,sampler=train_sampler,prefetch_factor  = prefetch_factor)
 testLoader = DataLoader(dataset,
                          batch_size=batch_size,
                          num_workers=num_workers,
                          drop_last=True,
-                         pin_memory=pin_memory,sampler=valid_sampler)
+                         pin_memory=pin_memory,sampler=valid_sampler,prefetch_factor = prefetch_factor)
 print("trainLoader size:",trainLoader.__len__()*trainLoader.batch_size)
 print("testLoader size:",testLoader.__len__()*testLoader.batch_size)
 
@@ -109,7 +109,7 @@ model = deeplab.DeepLab(num_classes=numClasses,
 
 #-- 3、Enable GPU for training
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = torch.device("cpu")
+# device = torch.device("cpu")
 model = model.to(device)
 
 
@@ -162,9 +162,10 @@ criterion = loss_functions.loss_fn_cosine
 
 ###################### Train Model #############################
 #-- 1、 config parameters
-MAX_EPOCH = 50
+MAX_EPOCH = 20
 
 #-- 2、epoch cycle
+import time
 for epoch in range(0,MAX_EPOCH):
     print('\n\nEpoch {}/{}'.format(epoch, MAX_EPOCH - 1))
     print('-' * 30)
@@ -175,24 +176,28 @@ for epoch in range(0,MAX_EPOCH):
     running_median = 0
 
     for iter_num,batch  in enumerate(tqdm(trainLoader)):
+        print('')
         inputs_t, label_t,mask_t = batch
         inputs_t = inputs_t.to(device)
         label_t = label_t.to(device)
-        print('')
         # Forward + Backward Prop
+        start = time.time()
         optimizer.zero_grad()
         torch.set_grad_enabled(True)
         normal_vectors = model(inputs_t)
         normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
-        inputs_t = inputs_t.detach().cpu()
-        label_t = label_t.detach().cpu()
-        mask_t = mask_t.squeeze(1)  # To shape (batchSize, Height, Width)
         loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum')
         loss /= batch_size
         loss.backward()
         optimizer.step()
+        print('time consume:',time.time()-start)
 
         # calcute metrics
+        inputs_t = inputs_t.detach().cpu()
+        label_t = label_t.detach().cpu()
+        normal_vectors_norm = normal_vectors_norm.detach().cpu()
+        mask_t = mask_t.squeeze(1)  # To shape (batchSize, Height, Width)
+
         loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
             normal_vectors_norm, label_t.double())
         running_mean += loss_deg_mean.item()
@@ -200,8 +205,7 @@ for epoch in range(0,MAX_EPOCH):
         running_loss += loss.item()
         print('loss_deg_mean:',loss_deg_mean)
         print('loss_deg_median:',loss_deg_median)
-
-    print("train running loss:",running_loss)
-    print("train running mean:",running_mean)
-    print("train running median:",running_median)
-
+    num_samples = (len(trainLoader))
+    print("train running loss:",running_loss/num_samples)
+    print("train running mean:",running_mean/num_samples)
+    print("train running median:",running_median/num_samples)
