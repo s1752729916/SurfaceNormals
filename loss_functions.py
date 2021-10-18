@@ -39,7 +39,7 @@ def loss_fn_cosine(input_vec, target_vec,mask_tensor = None, reduction='sum'):
     loss_cos[mask_invalid_pixels] = 0.0
     loss_cos_sum = loss_cos.sum()
     total_valid_pixels = (~mask_invalid_pixels).sum()
-    print(total_valid_pixels)
+    # print(total_valid_pixels)
 
     error_output = loss_cos_sum / total_valid_pixels
     if reduction == 'elementwise_mean':
@@ -82,7 +82,7 @@ def metric_calculator_batch(input_vec, target_vec, mask=None):
 
 
     total_valid_pixels = mask_valid_pixels.sum()
-    print("total_valid_pixels:",total_valid_pixels)
+    # print("total_valid_pixels:",total_valid_pixels)
     if (total_valid_pixels == 0):
         print('[WARN]: Image found with ZERO valid pixels to calc metrics')
         return torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0), torch.tensor(0), mask_valid_pixels

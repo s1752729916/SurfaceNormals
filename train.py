@@ -32,7 +32,7 @@ imgHeight = 512
 imgWidth = 512
 batch_size = 8
 num_workers = 4
-validation_split = 0.2
+validation_split = 0.9
 shuffle_dataset = True
 pin_memory = False
 prefetch_factor = 1
@@ -169,12 +169,15 @@ import time
 for epoch in range(0,MAX_EPOCH):
     print('\n\nEpoch {}/{}'.format(epoch, MAX_EPOCH - 1))
     print('-' * 30)
+
+    ###################### Training Cycle #############################
+    print('Train:')
+    print('=' * 10)
     model.train()  # set model mode to train mode
 
     running_loss = 0.0
     running_mean = 0
     running_median = 0
-
     for iter_num,batch  in enumerate(tqdm(trainLoader)):
         print('')
         inputs_t, label_t,mask_t = batch
@@ -209,3 +212,39 @@ for epoch in range(0,MAX_EPOCH):
     print("train running loss:",running_loss/num_samples)
     print("train running mean:",running_mean/num_samples)
     print("train running median:",running_median/num_samples)
+
+    ###################### Validation Cycle #############################
+    print('\nValidation:')
+    print('=' * 10)
+
+    model.eval() # eval mode, freeze params
+    running_loss = 0.0
+    running_mean = 0
+    running_median = 0
+    for iter_num, sample_batched in enumerate(tqdm(testLoader)):
+        print('')
+        inputs_t, label_t,mask_t = sample_batched
+        inputs_t = inputs_t.to(device)
+        label_t = label_t.to(device)
+
+        with torch.no_grad():
+            normal_vectors = model(inputs_t)
+
+        normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
+        loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum')
+        loss /= batch_size
+        # calcute metrics
+        inputs_t = inputs_t.detach().cpu()
+        label_t = label_t.detach().cpu()
+        normal_vectors_norm = normal_vectors_norm.detach().cpu()
+        mask_t = mask_t.squeeze(1)  # To shape (batchSize, Height, Width)
+
+        loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
+            normal_vectors_norm, label_t.double())
+        running_mean += loss_deg_mean.item()
+        running_median += loss_deg_median.item()
+        running_loss += loss.item()
+    num_samples = len(testLoader)
+    print("test running loss:",running_loss/num_samples)
+    print("test running mean:",running_mean/num_samples)
+    print("test running median:",running_median/num_samples)
