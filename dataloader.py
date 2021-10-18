@@ -17,7 +17,7 @@ import imgaug as ia
 import imageio
 
 import API.utils
-from API.utils import exr_loader
+# from API.utils import exr_loader
 class SurfaceNormalsDataset(Dataset):
     """
     Dataset class for training model on estimation of surface normals.

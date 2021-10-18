@@ -60,10 +60,10 @@ input_only = [
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
 dataset = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/homew/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-trainb-imgs',
-    input_normal_dir='/homew/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals',
-    label_dir='/homew/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals',
-    mask_dir='/homew/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-traingmentation-masks',
+    input_rgb_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/rgb-imgs',
+    input_normal_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals',
+    label_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals',
+    mask_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks',
     transform=augs_train, input_only=input_only)
 print("number of dataset: ",dataset.__len__())
 
@@ -190,7 +190,7 @@ for epoch in range(0,MAX_EPOCH):
         loss /= batch_size
         loss.backward()
         optimizer.step()
-        print('time consume:',time.time()-start)
+        # print('time consume:',time.time()-start)
 
         # calcute metrics
         inputs_t = inputs_t.detach().cpu()
