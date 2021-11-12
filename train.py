@@ -1,16 +1,9 @@
 # -*-coding:utf-8-*-
-import argparse
-import errno
-import glob
-import io
+
 import os
-import sys
-import random
-import shutil
+
 from termcolor import colored
 
-import imgaug as ia
-import numpy as np
 import torch
 import torch.nn as nn
 from imgaug import augmenters as iaa
@@ -61,37 +54,113 @@ input_only = [
     "simplex-blend", "add", "mul", "hue", "sat", "norm", "gray", "motion-blur", "gaus-blur", "add-element",
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
-dataset = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/rgb-imgs',
-    input_normal_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals',
-    label_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals',
-    mask_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks',
+######## train dataset concat ########
+dataset_train_cup_with_waves = dataloader.SurfaceNormalsDataset(
+    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/rgb-imgs',
+    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals',
+    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals',
+    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks',
     transform=augs_train, input_only=input_only)
-print("number of dataset: ",dataset.__len__())
+dataset_train_flower_bath_bomb = dataloader.SurfaceNormalsDataset(
+    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/rgb-imgs',
+    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/synthesis-normals',
+    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/camera-normals',
+    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/segmentation-masks',
+    transform=augs_train, input_only=input_only)
+dataset_train_heart_bath_bomb = dataloader.SurfaceNormalsDataset(
+    input_rgb_dir='/media/robot/data/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/rgb-imgs',
+    input_normal_dir='/media/robot/data/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/synthesis-normals',
+    label_dir='/media/robot/data/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/camera-normals',
+    mask_dir='/media/robot/data/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/segmentation-masks',
+    transform=augs_train, input_only=input_only)
+dataset_train_square_plastic_bottle = dataloader.SurfaceNormalsDataset(
+    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/rgb-imgs',
+    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/synthesis-normals',
+    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/camera-normals',
+    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/segmentation-masks',
+    transform=augs_train, input_only=input_only)
+dataset_train_stemless_plastic_champagne_glass = dataloader.SurfaceNormalsDataset(
+    input_rgb_dir='/media/robot/data/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/rgb-imgs',
+    input_normal_dir='/media/robot/data/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/synthesis-normals',
+    label_dir='/media/robot/data/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/camera-normals',
+    mask_dir='/media/robot/data/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/segmentation-masks',
+    transform=augs_train, input_only=input_only)
 
+######## test dataset concat #########
+dataset_test_glass_round_potion = dataloader.SurfaceNormalsDataset(
+    input_rgb_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/rgb-imgs',
+    input_normal_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/synthesis-normals',
+    label_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/camera-normals',
+    mask_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/segmentation-masks',
+    transform=augs_train, input_only=input_only
+)
+dataset_test_glass_square_potion = dataloader.SurfaceNormalsDataset(
+    input_rgb_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/rgb-imgs',
+    input_normal_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/synthesis-normals',
+    label_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/camera-normals',
+    mask_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/segmentation-masks',
+    transform=augs_train, input_only=input_only
+)
+dataset_test_star_bath_bomb = dataloader.SurfaceNormalsDataset(
+    input_rgb_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/rgb-imgs',
+    input_normal_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/synthesis-normals',
+    label_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/camera-normals',
+    mask_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/segmentation-masks',
+    transform=augs_train, input_only=input_only
+)
+dataset_test_tree_bath_bomb = dataloader.SurfaceNormalsDataset(
+    input_rgb_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/rgb-imgs',
+    input_normal_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/synthesis-normals',
+    label_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/camera-normals',
+    mask_dir='/home/zjw/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/segmentation-masks',
+    transform=augs_train, input_only=input_only
+)
+
+db_train_list = [dataset_train_cup_with_waves,dataset_train_flower_bath_bomb,dataset_train_heart_bath_bomb,dataset_train_heart_bath_bomb,dataset_train_square_plastic_bottle,dataset_train_stemless_plastic_champagne_glass]
+db_test_list = [dataset_test_glass_round_potion,dataset_test_glass_square_potion,dataset_test_star_bath_bomb,dataset_test_tree_bath_bomb]
+
+dataset_train = torch.utils.data.ConcatDataset(db_train_list)
+dataset_test = torch.utils.data.ConcatDataset(db_test_list)
+print("number of train dataset: ",dataset_train.__len__())
+print("number of test dataset:",dataset_test.__len__())
 #-- 2、create dataloader
 # Creating data indices for training and validation splits:
-dataset_size = len(dataset)
-indices = list(range(dataset_size))
-split = int(np.floor(validation_split * dataset_size))
-random_seed = 42
-if shuffle_dataset :
-    np.random.seed(random_seed)
-    np.random.shuffle(indices)
-train_indices, val_indices = indices[split:], indices[:split]
+# dataset_size = len(dataset)
+# indices = list(range(dataset_size))
+# split = int(np.floor(validation_split * dataset_size))
+# random_seed = 42
+# if shuffle_dataset :
+#     np.random.seed(random_seed)
+#     np.random.shuffle(indices)
+# train_indices, val_indices = indices[split:], indices[:split]
+#
+# train_sampler = SubsetRandomSampler(train_indices)
+# valid_sampler = SubsetRandomSampler(val_indices)
+# trainLoader = DataLoader(dataset,
+#                          num_workers=num_workers,
+#                          batch_size=batch_size,
+#                          drop_last=True,
+#                          pin_memory=pin_memory,sampler=train_sampler,prefetch_factor  = prefetch_factor)
+# testLoader = DataLoader(dataset,
+#                          batch_size=batch_size,
+#                          num_workers=num_workers,
+#                          drop_last=True,
+#                          pin_memory=pin_memory,sampler=valid_sampler,prefetch_factor = prefetch_factor)
 
-train_sampler = SubsetRandomSampler(train_indices)
-valid_sampler = SubsetRandomSampler(val_indices)
-trainLoader = DataLoader(dataset,
+trainLoader = DataLoader(dataset_train,
                          num_workers=num_workers,
                          batch_size=batch_size,
                          drop_last=True,
-                         pin_memory=pin_memory,sampler=train_sampler,prefetch_factor  = prefetch_factor)
-testLoader = DataLoader(dataset,
-                         batch_size=batch_size,
+                         pin_memory=pin_memory,
+                         prefetch_factor=prefetch_factor
+                         )
+testLoader = DataLoader(dataset_test,
                          num_workers=num_workers,
+                         batch_size=batch_size,
                          drop_last=True,
-                         pin_memory=pin_memory,sampler=valid_sampler,prefetch_factor = prefetch_factor)
+                         pin_memory=pin_memory,
+                         prefetch_factor=prefetch_factor
+                         )
 print("trainLoader size:",trainLoader.__len__()*trainLoader.batch_size)
 print("testLoader size:",testLoader.__len__()*testLoader.batch_size)
 
@@ -164,7 +233,7 @@ criterion = loss_functions.loss_fn_cosine
 
 ###################### Train Model #############################
 #-- 1、config parameters
-MAX_EPOCH = 20
+MAX_EPOCH = 50
 saveModelInterval = 1
 CHECKPOINT_DIR = '/home/zjw/smq/SurfaceNormals/CheckPoints'
 total_iter_num = 0
