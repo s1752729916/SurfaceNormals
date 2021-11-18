@@ -19,10 +19,7 @@ import loss_functions
 
 #-- 1、 config parameters
 
-input_rgb_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-trainb-imgs'
-input_normal_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals'
-label_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals'
-mask_dir='/media/smq/移动硬盘/学习/数据集/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-traingmentation-masks'
+
 imgHeight = 512
 imgWidth = 512
 batch_size = 8
@@ -32,7 +29,7 @@ shuffle_dataset = True
 pin_memory = False
 prefetch_factor = 1
 
-#-- 2、create dataset
+    #-- 2、create dataset
 augs_train = iaa.Sequential([
     # Geometric Augs
     iaa.Resize({"height": imgHeight, "width": imgWidth }, interpolation='nearest'),  # Resize image

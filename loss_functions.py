@@ -69,7 +69,7 @@ def metric_calculator_batch(input_vec, target_vec, mask=None):
         float: The median error in 2 surface normals in degrees
         float: The percentage of pixels with error less than 11.25 degrees
         float: The percentage of pixels with error less than 22.5 degrees
-        float: The percentage of pixels with error less than 3 degrees
+        float: The percentage of pixels with error less than 30 degrees
     """
     if len(input_vec.shape) != 4:
         raise ValueError('Shape of tensor must be [B, C, H, W]. Got shape: {}'.format(input_vec.shape))
