@@ -34,7 +34,7 @@ def loss_fn_cosine(input_vec, target_vec,mask_tensor = None, reduction='sum'):
 
     # calculate loss only on valid pixels
     # mask_invalid_pixels = (target_vec[:, 0, :, :] == -1.0) & (target_vec[:, 1, :, :] == -1.0) & (target_vec[:, 2, :, :] == -1.0)
-    mask_invalid_pixels = torch.all(target_vec == 0, dim=1)
+    mask_invalid_pixels = torch.all(target_vec < -1/np.sqrt(3)+1e-4, dim=1)
     # mask_invalid_pixels = torch.all(mask_tensor==0,dim=)
     loss_cos[mask_invalid_pixels] = 0.0
     loss_cos_sum = loss_cos.sum()
@@ -76,9 +76,9 @@ def metric_calculator_batch(input_vec, target_vec, mask=None):
     if len(target_vec.shape) != 4:
         raise ValueError('Shape of tensor must be [B, C, H, W]. Got shape: {}'.format(target_vec.shape))
 
-    INVALID_PIXEL_VALUE = 0  # All 3 channels should have this value
+    INVALID_PIXEL_VALUE = -1/np.sqrt(3)+1e-4  # All 3 channels should have this value
 
-    mask_valid_pixels = ~(torch.all(target_vec == INVALID_PIXEL_VALUE, dim=1))
+    mask_valid_pixels = ~(torch.all(target_vec < INVALID_PIXEL_VALUE, dim=1))
 
 
     total_valid_pixels = mask_valid_pixels.sum()

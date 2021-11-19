@@ -53,63 +53,63 @@ input_only = [
 ]
 ######## train dataset concat ########
 dataset_train_cup_with_waves = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/rgb-imgs',
-    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals',
-    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals',
-    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks',
+    input_rgb_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/rgb-imgs',
+    input_normal_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/synthesis-normals',
+    label_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/camera-normals',
+    mask_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/cup-with-waves-train/segmentation-masks',
     transform=augs_train, input_only=input_only)
 dataset_train_flower_bath_bomb = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/rgb-imgs',
-    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/synthesis-normals',
-    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/camera-normals',
-    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/segmentation-masks',
+    input_rgb_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/rgb-imgs',
+    input_normal_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/synthesis-normals',
+    label_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/camera-normals',
+    mask_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/flower-bath-bomb-train/segmentation-masks',
     transform=augs_train, input_only=input_only)
 dataset_train_heart_bath_bomb = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/rgb-imgs/',
-    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/synthesis-normals',
-    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/camera-normals',
-    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/segmentation-masks',
+    input_rgb_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/rgb-imgs/',
+    input_normal_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/synthesis-normals',
+    label_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/camera-normals',
+    mask_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/heart-bath-bomb-train/segmentation-masks',
     transform=augs_train, input_only=input_only)
 dataset_train_square_plastic_bottle = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/rgb-imgs',
-    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/synthesis-normals',
-    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/camera-normals',
-    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/segmentation-masks',
+    input_rgb_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/rgb-imgs',
+    input_normal_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/synthesis-normals',
+    label_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/camera-normals',
+    mask_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/square-plastic-bottle-train/segmentation-masks',
     transform=augs_train, input_only=input_only)
 dataset_train_stemless_plastic_champagne_glass = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/rgb-imgs',
-    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/synthesis-normals',
-    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/camera-normals',
-    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/segmentation-masks',
+    input_rgb_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/rgb-imgs',
+    input_normal_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/synthesis-normals',
+    label_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/camera-normals',
+    mask_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-train/stemless-plastic-champagne-glass-train/segmentation-masks',
     transform=augs_train, input_only=input_only)
 
 ######## test dataset concat #########
 dataset_test_glass_round_potion = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/rgb-imgs',
-    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/synthesis-normals',
-    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/camera-normals',
-    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/segmentation-masks',
+    input_rgb_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/rgb-imgs',
+    input_normal_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/synthesis-normals',
+    label_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/camera-normals',
+    mask_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/segmentation-masks',
     transform=augs_train, input_only=input_only
 )
 dataset_test_glass_square_potion = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/rgb-imgs',
-    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/synthesis-normals',
-    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/camera-normals',
-    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/segmentation-masks',
+    input_rgb_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/rgb-imgs',
+    input_normal_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/synthesis-normals',
+    label_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/camera-normals',
+    mask_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-square-potion-test/segmentation-masks',
     transform=augs_train, input_only=input_only
 )
 dataset_test_star_bath_bomb = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/rgb-imgs',
-    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/synthesis-normals',
-    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/camera-normals',
-    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/segmentation-masks',
+    input_rgb_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/rgb-imgs',
+    input_normal_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/synthesis-normals',
+    label_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/camera-normals',
+    mask_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/star-bath-bomb-test/segmentation-masks',
     transform=augs_train, input_only=input_only
 )
 dataset_test_tree_bath_bomb = dataloader.SurfaceNormalsDataset(
-    input_rgb_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/rgb-imgs',
-    input_normal_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/synthesis-normals',
-    label_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/camera-normals',
-    mask_dir='/media/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/segmentation-masks',
+    input_rgb_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/rgb-imgs',
+    input_normal_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/synthesis-normals',
+    label_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/camera-normals',
+    mask_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/tree-bath-bomb-test/segmentation-masks',
     transform=augs_train, input_only=input_only
 )
 

@@ -28,10 +28,10 @@ pin_memory = False
 prefetch_factor = 1
 
 #-- 2、create dataset
-dataset_middle_round_cup = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/smq/samples/Middle-Round-Cup-2/PolarImg-I-sum/8-Bit',
-                                                                         input_normal_dir='/media/smq/samples/Middle-Round-Cup-2/synthesis-normals',
-                                                                         label_dir= '/media/smq/samples/Middle-Round-Cup-2/Normals-PNG',
-                                                                         mask_dir= '/media/smq/samples/Middle-Round-Cup-2/Masks')
+dataset_middle_round_cup = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/Middle-Round-Cup-2/PolarImg-I-sum/8-Bit',
+                                                                         input_normal_dir='/media/zjw/data/smq/samples/Middle-Round-Cup-2/synthesis-normals',
+                                                                         label_dir= '/media/zjw/data/smq/samples/Middle-Round-Cup-2/Normals-PNG',
+                                                                         mask_dir= '/media/zjw/data/smq/samples/Middle-Round-Cup-2/Masks')
 #-- 3、create dataloader
 testLoader = DataLoader(dataset_middle_round_cup,
                          num_workers=num_workers,
@@ -56,7 +56,7 @@ model = deeplab.DeepLab(num_classes=numClasses,
 
 #-- 3、load model params
 CHECKPOINT_DIR = '/home/zjw/smq/SurfaceNormals/CheckPoints'
-checkpoint_path = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0007.pth')
+checkpoint_path = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0000.pth')
 
 if not os.path.isfile(checkpoint_path):
     raise ValueError('Invalid path to the given weights file for transfer learning.\
@@ -122,15 +122,13 @@ for iter_num, sample_batched in enumerate(tqdm(testLoader)):
     ax1 = plt.subplot(212)
     predict_norm = normal_vectors_norm.numpy().squeeze(0).transpose(1,2,0)
 
-    predict_norm[mask_t.squeeze(0)==0,:] = -1
+    # predict_norm[mask_t.squeeze(0)==0,:] = -1
 
 
     predict_norm_rgb = API.utils.normal_to_rgb(predict_norm)
 
     predict_norm_rgb_tensor = torch.from_numpy(predict_norm_rgb.transpose(2,0,1))
-    predict_norm_rgb_tensor = predict_norm_rgb_tensor.unsqueeze(0)
-    label_t_rgb_tensor = torch.from_numpy(label_t_rgb.transpose(2,0,1))
-    label_t_rgb_tensor = label_t_rgb_tensor.unsqueeze(0)
+
 
     # loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
     #     predict_norm_rgb_tensor.double(), label_t_rgb_tensor.double())

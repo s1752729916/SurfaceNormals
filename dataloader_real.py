@@ -136,7 +136,7 @@ class RealSurfaceNormalsDataset(Dataset):
 
         # convert 0-255 to (-1,1)
         label_tensor = torch.from_numpy(label_img).float()  # (C,H,W)
-        label_tensor = (label_tensor-127.5)/127.5
+        label_tensor = (label_tensor-127)/127.0
         label_tensor = nn.functional.normalize(label_tensor,p=2,dim=0)
         mask_tensor = torch.from_numpy(mask_img.copy()).unsqueeze(0)
 

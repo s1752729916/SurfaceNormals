@@ -83,7 +83,7 @@ class SurfaceNormalsDataset(Dataset):
         norm_2 = API.utils.rgb_loader(norm_2_path)
         norm_3 = API.utils.rgb_loader(norm_3_path)
         mask_img = API.utils.mask_loader(mask_path)
-        label_img = API.utils.rgb_loader(label_path).transpose(2,0,1)
+        label_img = API.utils.rgb_loader(label_path).transpose(2,0,1)  # To( C,H,W)
         # print("load time",time.time()-start)
 
 
@@ -127,7 +127,8 @@ class SurfaceNormalsDataset(Dataset):
         # start = time.time()
 
         input_tensor = transforms.ToTensor()(input_img_arr.copy().transpose(1,2,0))  #ToTensor contains the normalization process
-        label_tensor = torch.from_numpy(label_img)
+        label_tensor = torch.from_numpy(label_img).float()
+        label_tensor = (label_tensor-127)/127.0
         label_tensor = nn.functional.normalize(label_tensor,p=2,dim=0)
         mask_tensor = torch.from_numpy(mask_img.copy()).unsqueeze(0)
 
