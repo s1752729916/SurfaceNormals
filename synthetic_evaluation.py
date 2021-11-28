@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 import API.utils
 from modeling import deeplab
-import dataloader_real
+import dataloader
 import loss_functions
 
 ###################### DataLoader #############################
@@ -28,12 +28,14 @@ pin_memory = False
 prefetch_factor = 1
 
 #-- 2、create dataset
-dataset_middle_round_cup = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/Middle-Round-Cup-2/PolarImg-I-sum/8-Bit',
-                                                                         input_normal_dir='/media/zjw/data/smq/samples/Middle-Round-Cup-2/synthesis-normals',
-                                                                         label_dir= '/media/zjw/data/smq/samples/Middle-Round-Cup-2/Normals-PNG',
-                                                                         mask_dir= '/media/zjw/data/smq/samples/Middle-Round-Cup-2/Masks')
+dataset_test_glass_round_potion = dataloader.SurfaceNormalsDataset(
+    input_rgb_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/rgb-imgs',
+    input_normal_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/synthesis-normals',
+    label_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/camera-normals',
+    mask_dir='/media/zjw/data/smq/ClearGrasp/cleargrasp-dataset-test-val/synthetic-test/glass-round-potion-test/segmentation-masks',
+)
 #-- 3、create dataloader
-testLoader = DataLoader(dataset_middle_round_cup,
+testLoader = DataLoader(dataset_test_glass_round_potion,
                          num_workers=num_workers,
                          batch_size=batch_size,
                          drop_last=False,
@@ -56,7 +58,7 @@ model = deeplab.DeepLab(num_classes=numClasses,
 
 #-- 3、load model params
 CHECKPOINT_DIR = '/home/zjw/smq/SurfaceNormals/CheckPoints'
-checkpoint_path = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0000.pth')
+checkpoint_path = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0007.pth')
 
 if not os.path.isfile(checkpoint_path):
     raise ValueError('Invalid path to the given weights file for transfer learning.\

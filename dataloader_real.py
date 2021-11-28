@@ -292,10 +292,10 @@ if (__name__ == '__main__'):
     input_only = ["gaus-blur", "grayscale", "gaus-noise", "brightness", "contrast", "hue-sat", "color-jitter"]
 
     dt_train = RealSurfaceNormalsDataset(
-        input_I_sum_dir='/media/smq/samples/Middle-Round-Cup-2/PolarImg-I-sum/8-Bit',
-        input_normal_dir='/media/smq/samples/Middle-Round-Cup-2/synthesis-normals',
-        label_dir='/media/smq/samples/Middle-Round-Cup-2/Normals-PNG',
-        mask_dir='/media/smq/samples/Middle-Round-Cup-2/Masks')
+        input_I_sum_dir='/media/zjw/data/smq/samples/Middle-Round-Cup-2/PolarImg-I-sum/8-Bit',
+        input_normal_dir='/media/zjw/data/smq/samples/Middle-Round-Cup-2/synthesis-normals',
+        label_dir='/media/zjw/data/smq/samples/Middle-Round-Cup-2/Normals-PNG',
+        mask_dir='/media/zjw/data/smq/samples/Middle-Round-Cup-2/Masks')
 
     # print("dataset")
     # batch_size = 16
@@ -335,7 +335,7 @@ if (__name__ == '__main__'):
 
     import loss_functions
 
-    input_tensor, label_tensor, mask_tensor = dt_train.__getitem__(5)
+    input_tensor, label_tensor, mask_tensor = dt_train.__getitem__(11)
     input_img_arr = input_tensor.numpy()
     label_img = label_tensor.numpy()
     mask_img = mask_tensor.numpy()
@@ -364,7 +364,7 @@ if (__name__ == '__main__'):
                                                 mask_tensor=mask_tensor.unsqueeze(0).squeeze(1),
                                                 reduction='elementwise_mean'))
     loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
-        input_tensor[1:4, :, :].unsqueeze(0), label_tensor.double().unsqueeze(0))
+        input_tensor[10:13, :, :].unsqueeze(0), label_tensor.double().unsqueeze(0))
     print("loss_deg_mean:", loss_deg_mean)
     print("loss_deg_median:", loss_deg_median)
     print("percentage_1:", percentage_1)
