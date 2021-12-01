@@ -54,28 +54,28 @@ input_only = [
 ######## train dataset concat ########
 dataset_tiny_white_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/I-sum',
                                                                          input_normal_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/synthesis-normals',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/normals-png')
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/normals-png',transform=augs_train)
 dataset_tiny_white_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/I-sum',
                                                                          input_normal_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/synthesis-normals',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/normals-png')
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/normals-png',transform=augs_train)
 dataset_plastic_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/I-sum',
                                                                          input_normal_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/synthesis-normals',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/normals-png')
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/normals-png',transform=augs_train)
 dataset_plastic_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/I-sum',
                                                                          input_normal_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/synthesis-normals',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/normals-png')
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/normals-png',transform=augs_train)
 dataset_middle_round_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/I-sum',
                                                                          input_normal_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/synthesis-normals',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/normals-png')
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/normals-png',transform=augs_train)
 dataset_middle_round_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/I-sum',
                                                                          input_normal_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/synthesis-normals',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/normals-png')
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/normals-png',transform=augs_train)
 dataset_little_square_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/I-sum',
                                                                          input_normal_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/synthesis-normals',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/normals-png')
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/normals-png',transform=augs_train)
 dataset_little_square_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/I-sum',
                                                                          input_normal_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/synthesis-normals',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/normals-png')
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/normals-png',transform=augs_train)
 db_list = [dataset_tiny_white_cup_11_28,dataset_tiny_white_cup_11_30,dataset_plastic_cup_11_28,dataset_plastic_cup_11_30,dataset_middle_round_cup_11_28,dataset_middle_round_cup_11_30,dataset_little_square_cup_11_28,dataset_little_square_cup_11_30]
 dataset = torch.utils.data.ConcatDataset(db_list)
 
@@ -238,7 +238,6 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     running_mean = 0
     running_median = 0
     for iter_num,batch  in enumerate(tqdm(trainLoader)):
-        print('')
         total_iter_num+=1
         inputs_t, label_t = batch
         inputs_t = inputs_t.to(device)
@@ -259,15 +258,14 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
         inputs_t = inputs_t.detach().cpu()
         label_t = label_t.detach().cpu()
         normal_vectors_norm = normal_vectors_norm.detach().cpu()
-        mask_t = mask_t.squeeze(1)  # To shape (batchSize, Height, Width)
 
         loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
             normal_vectors_norm, label_t.double())
         running_mean += loss_deg_mean.item()
         running_median += loss_deg_median.item()
         running_loss += loss.item()
-        print('loss_deg_mean:',loss_deg_mean)
-        print('loss_deg_median:',loss_deg_median)
+        # print('loss_deg_mean:',loss_deg_mean)
+        # print('loss_deg_median:',loss_deg_median)
     num_samples = (len(trainLoader))
     epoch_loss = running_loss/num_samples
     print("train running loss:",epoch_loss)
@@ -275,21 +273,21 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print("train running median:",running_median/num_samples)
 
 
-    # save the model check point every N epoch
-    if epoch % saveModelInterval==0:
-        filename = os.path.join(CHECKPOINT_DIR,'check-point-epoch-{:04d}.pth'.format(epoch))
-        if torch.cuda.device_count() > 1:
-            model_params = model.module.state_dict()  # Saving nn.DataParallel model
-        else:
-            model_params = model.state_dict()
-        torch.save(
-            {
-                'model_state_dict': model_params,
-                'optimizer_state_dict': optimizer.state_dict(),
-                'epoch': epoch,
-                'total_iter_num': total_iter_num,
-                'epoch_loss': epoch_loss,
-            }, filename)
+    # # save the model check point every N epoch
+    # if epoch % saveModelInterval==0:
+    #     filename = os.path.join(CHECKPOINT_DIR,'check-point-epoch-{:04d}.pth'.format(epoch))
+    #     if torch.cuda.device_count() > 1:
+    #         model_params = model.module.state_dict()  # Saving nn.DataParallel model
+    #     else:
+    #         model_params = model.state_dict()
+    #     torch.save(
+    #         {
+    #             'model_state_dict': model_params,
+    #             'optimizer_state_dict': optimizer.state_dict(),
+    #             'epoch': epoch,
+    #             'total_iter_num': total_iter_num,
+    #             'epoch_loss': epoch_loss,
+    #         }, filename)
 
 
 
@@ -302,8 +300,8 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     running_mean = 0
     running_median = 0
     for iter_num, sample_batched in enumerate(tqdm(testLoader)):
-        print('')
-        inputs_t, label_t,mask_t = sample_batched
+        # print('')
+        inputs_t, label_t = sample_batched
         inputs_t = inputs_t.to(device)
         label_t = label_t.to(device)
 
@@ -317,7 +315,6 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
         inputs_t = inputs_t.detach().cpu()
         label_t = label_t.detach().cpu()
         normal_vectors_norm = normal_vectors_norm.detach().cpu()
-        mask_t = mask_t.squeeze(1)  # To shape (batchSize, Height, Width)
 
         loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
             normal_vectors_norm, label_t.double())
