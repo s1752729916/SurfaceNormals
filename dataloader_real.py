@@ -37,7 +37,7 @@ class RealSurfaceNormalsDataset(Dataset):
         input_only (list, str): List of transforms that are to be applied only to the input img
     """
 
-    def __init__(self, input_I_sum_dir, input_normal_dir, label_dir, mask_dir, transform=None, input_only=None):
+    def __init__(self, input_I_sum_dir, input_normal_dir, label_dir, mask_dir=None, transform=None, input_only=None):
         self.input_I_sum_dir = input_I_sum_dir  # rgb path is used to calculate intensity image(rgb2grey)
         self.input_norm_dir = input_normal_dir
         self.labels_dir = label_dir
@@ -76,7 +76,8 @@ class RealSurfaceNormalsDataset(Dataset):
         norm_1_path = self._datalist_input_normal_1[index]
         norm_2_path = self._datalist_input_normal_2[index]
         norm_3_path = self._datalist_input_normal_3[index]
-        mask_path = self._datalist_mask[index]
+        if(self.masks_dir is not None):
+            mask_path = self._datalist_mask[index]
         label_path = self._datalist_label[index]
         # start = time.time()
 
@@ -86,7 +87,8 @@ class RealSurfaceNormalsDataset(Dataset):
         norm_1 = API.utils.rgb_loader(norm_1_path)
         norm_2 = API.utils.rgb_loader(norm_2_path)
         norm_3 = API.utils.rgb_loader(norm_3_path)
-        mask_img = API.utils.mask_loader(mask_path)
+        if(self.masks_dir is not None):
+            mask_img = API.utils.mask_loader(mask_path)
         label_img = API.utils.rgb_loader(label_path).transpose(2, 0, 1) # To( C,H,W)
         # print("load time",time.time()-start)
 
@@ -103,9 +105,10 @@ class RealSurfaceNormalsDataset(Dataset):
         # print("concat time",time.time()-start)
 
         # -- 5、apply mask to inputs and label
-        # start = time.time()
-        input_img_arr[:, mask_img == 0] = 0
-        label_img[:, mask_img == 0] = 0
+        if(self.masks_dir is not None):
+            # start = time.time()
+            input_img_arr[:, mask_img == 0] = 0
+            label_img[:, mask_img == 0] = 0
 
         # print("apply mask time",time.time()-start)
 
@@ -124,8 +127,9 @@ class RealSurfaceNormalsDataset(Dataset):
                 activator=self._activator_masks))  # some transforms only appy to inputs, not label
             label_img = label_img.transpose(2, 0, 1)  # To (C,H,W)
             # apply mask
-            mask_img = det_tf.augment_image(mask_img, hooks=ia.HooksImages(
-                activator=self._activator_masks))  # some transforms only appy to inputs, not label
+            if(self.masks_dir is not None):
+                mask_img = det_tf.augment_image(mask_img, hooks=ia.HooksImages(
+                    activator=self._activator_masks))  # some transforms only appy to inputs, not label
         # print("augmentation time",time.time()-start)
 
         # -- 4、normalize
@@ -138,7 +142,8 @@ class RealSurfaceNormalsDataset(Dataset):
         label_tensor = torch.from_numpy(label_img).float()  # (C,H,W)
         label_tensor = (label_tensor-127)/127.0
         label_tensor = nn.functional.normalize(label_tensor,p=2,dim=0)
-        mask_tensor = torch.from_numpy(mask_img.copy()).unsqueeze(0)
+        if(self.masks_dir is not None):
+            mask_tensor = torch.from_numpy(mask_img.copy()).unsqueeze(0)
 
         # print("normalize time",time.time()-start)
         # print("total time:" ,time.time()-all_time)
@@ -162,7 +167,10 @@ class RealSurfaceNormalsDataset(Dataset):
         # plt.show()
         # print("getitem time consumeption:",time.time()-start)
         # print("label_tensor shape:",label_tensor.shape)
-        return input_tensor, label_tensor, mask_tensor
+        if(self.masks_dir is not None):
+            return input_tensor, label_tensor, mask_tensor
+        else:
+            return input_tensor,label_tensor
 
     def _create_lists_filenames(self):
         '''Creates a list of filenames of images and labels each in dataset
@@ -180,11 +188,12 @@ class RealSurfaceNormalsDataset(Dataset):
             self.input_norm_dir)
         assert os.path.isdir(self.labels_dir), 'Dataloader given labels directory that does not exist: "%s"' % (
             self.labels_dir)
-        assert os.path.isdir(
-            self.masks_dir), 'Dataloader given masks_dir images directory that does not exist: "%s"' % (self.masks_dir)
+        if(self.masks_dir is not None):
+            assert os.path.isdir(
+                self.masks_dir), 'Dataloader given masks_dir images directory that does not exist: "%s"' % (self.masks_dir)
 
         # -- 1、input I_sum images
-        I_sum_path_search_str = os.path.join(self.input_I_sum_dir, '*' + '-I-Sum-8bit.png')
+        I_sum_path_search_str = os.path.join(self.input_I_sum_dir, '*.png')
         self._datalist_I_sum = sorted(glob.glob(I_sum_path_search_str))
         numISumImages = len(self._datalist_I_sum)
         if numISumImages == 0:
@@ -226,7 +235,7 @@ class RealSurfaceNormalsDataset(Dataset):
             raise ValueError('Numbers of input normals are different.')
 
         # -- 3、labels(real normals)
-        labels_search_str = os.path.join(self.labels_dir, '*-normals.png')
+        labels_search_str = os.path.join(self.labels_dir, '*.png')
         self._datalist_label = sorted(glob.glob(labels_search_str))
         numLabels = len(self._datalist_label)
         if numLabels == 0:
@@ -234,12 +243,13 @@ class RealSurfaceNormalsDataset(Dataset):
                 'No input label files found in given directory. Searched in dir: {} '.format(self.labels_dir))
 
         # -- 4、masks
-        masks_search_str = os.path.join(self.masks_dir, '*-Mask.png')
-        self._datalist_mask = sorted(glob.glob(masks_search_str))
-        numMasks = len(self._datalist_mask)
-        if numMasks == 0:
-            raise ValueError(
-                'No input mask files found in given directory. Searched in dir: {} '.format(self.masks_dir))
+        if(self.masks_dir is not None):
+            masks_search_str = os.path.join(self.masks_dir, '*-Mask.png')
+            self._datalist_mask = sorted(glob.glob(masks_search_str))
+            numMasks = len(self._datalist_mask)
+            if numMasks == 0:
+                raise ValueError(
+                    'No input mask files found in given directory. Searched in dir: {} '.format(self.masks_dir))
 
         # -- 5、verify number of every input
         if not (numISumImages == numNorm_0 == numLabels == numLabels):
