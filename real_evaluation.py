@@ -28,19 +28,69 @@ pin_memory = False
 prefetch_factor = 1
 
 #-- 2、create dataset
-dataset_middle_round_cup = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/Middle-Round-Cup-2/PolarImg-I-sum/8-Bit',
-                                                                         input_normal_dir='/media/zjw/data/smq/samples/Middle-Round-Cup-2/synthesis-normals',
-                                                                         label_dir= '/media/zjw/data/smq/samples/Middle-Round-Cup-2/Normals-PNG',
-                                                                         mask_dir= '/media/zjw/data/smq/samples/Middle-Round-Cup-2/Masks')
+augs_train = iaa.Sequential([
+    # Geometric Augs
+    iaa.Resize({"height": imgHeight, "width": imgWidth }, interpolation='nearest'),  # Resize image
+    # iaa.Fliplr(0.5),
+    # iaa.Flipud(0.5),
+    # iaa.Rot90((0, 4)),
+    # Blur and Noise
+    # iaa.Sometimes(0.2, iaa.GaussianBlur(sigma=(0, 1.5), name="gaus-blur")),
+    # iaa.Sometimes(0.1, iaa.Grayscale(alpha=(0.0, 1.0), from_colorspace="RGB", name="grayscale")),
+    # iaa.Sometimes(0.2, iaa.AdditiveLaplaceNoise(scale=(0, 0.1*255), per_channel=True, name="gaus-noise")),
+
+    # Color, Contrast, etc.
+    # iaa.Sometimes(0.2, iaa.Multiply((0.75, 1.25), per_channel=0.1, name="brightness")),
+    # iaa.Sometimes(0.2, iaa.GammaContrast((0.7, 1.3), per_channel=0.1, name="contrast")),
+    # iaa.Sometimes(0.2, iaa.AddToHueAndSaturation((-20, 20), name="hue-sat")),
+    # iaa.Sometimes(0.3, iaa.Add((-20, 20), per_channel=0.5, name="color-jitter")),
+])
+input_only = [
+    "simplex-blend", "add", "mul", "hue", "sat", "norm", "gray", "motion-blur", "gaus-blur", "add-element",
+    "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
+]
+dataset_tiny_white_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/I-sum',
+                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/synthesis-normals',
+                                                                         mask_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/masks',
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/normals-png',transform=augs_train)
+dataset_tiny_white_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/I-sum',
+                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/synthesis-normals',
+                                                                         mask_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/masks',
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/normals-png',transform=augs_train)
+dataset_plastic_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/I-sum',
+                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/synthesis-normals',
+                                                                         mask_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/masks',
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/normals-png',transform=augs_train)
+dataset_plastic_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/I-sum',
+                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/synthesis-normals',
+                                                                         mask_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/masks',
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/normals-png',transform=augs_train)
+dataset_middle_round_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/I-sum',
+                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/synthesis-normals',
+                                                                         mask_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/masks',
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/normals-png',transform=augs_train)
+dataset_middle_round_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/I-sum',
+                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/synthesis-normals',
+                                                                         mask_dir = '/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/masks',
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/normals-png',transform=augs_train)
+dataset_little_square_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/I-sum',
+                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/synthesis-normals',
+                                                                         mask_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/masks',
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/normals-png',transform=augs_train)
+dataset_little_square_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/I-sum',
+                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/synthesis-normals',
+                                                                         mask_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/masks',
+                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/normals-png',transform=augs_train)
+db_list = [dataset_tiny_white_cup_11_28,dataset_tiny_white_cup_11_30,dataset_plastic_cup_11_28,dataset_plastic_cup_11_30,dataset_middle_round_cup_11_28,dataset_middle_round_cup_11_30,dataset_little_square_cup_11_28,dataset_little_square_cup_11_30]
+dataset = torch.utils.data.ConcatDataset(db_list)
 #-- 3、create dataloader
-testLoader = DataLoader(dataset_middle_round_cup,
+
+
+testLoader = DataLoader(dataset,
                          num_workers=num_workers,
                          batch_size=batch_size,
-                         drop_last=False,
-                         pin_memory=pin_memory,
-                         prefetch_factor=prefetch_factor
-                         )
-
+                         drop_last=True,
+                         pin_memory=pin_memory)
 ###################### ModelLoad #############################
 #-- 1、 config parameters
 backbone_model = 'resnet50'
@@ -56,7 +106,7 @@ model = deeplab.DeepLab(num_classes=numClasses,
 
 #-- 3、load model params
 CHECKPOINT_DIR = '/home/zjw/smq/SurfaceNormals/CheckPoints'
-checkpoint_path = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0000.pth')
+checkpoint_path = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0007.pth')
 
 if not os.path.isfile(checkpoint_path):
     raise ValueError('Invalid path to the given weights file for transfer learning.\

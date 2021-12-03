@@ -17,7 +17,8 @@ import imgaug as ia
 import imageio
 
 import API.utils
-
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # from API.utils import exr_loader
 class RealSurfaceNormalsDataset(Dataset):
@@ -76,11 +77,20 @@ class RealSurfaceNormalsDataset(Dataset):
         norm_1_path = self._datalist_input_normal_1[index]
         norm_2_path = self._datalist_input_normal_2[index]
         norm_3_path = self._datalist_input_normal_3[index]
+
         if(self.masks_dir is not None):
             mask_path = self._datalist_mask[index]
         label_path = self._datalist_label[index]
         # start = time.time()
-
+        # print(index)
+        # print(I_sum_path)
+        # print(norm_0_path)
+        # print(norm_1_path)
+        # print(norm_2_path)
+        # print(norm_3_path)
+        # print(mask_path)
+        # print(label_path)
+        # print('')
         # -- 2、load imgs
         I_sum_path = imageio.imread(I_sum_path)  # numpy array shape is (height, width)
         norm_0 = API.utils.rgb_loader(norm_0_path)  # numpy array shape is (height, width, 3)

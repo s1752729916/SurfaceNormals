@@ -14,7 +14,7 @@ from modeling import deeplab
 import dataloader_real
 import loss_functions
 import numpy as np
-
+import API.utils
 ###################### DataLoader #############################
 
 #-- 1、 config parameters
@@ -107,7 +107,7 @@ trainLoader = DataLoader(dataset,
                          drop_last=True,
                          pin_memory=pin_memory,sampler=train_sampler)
 testLoader = DataLoader(dataset,
-                         batch_size=batch_size,
+                         batch_size=1,
                          num_workers=num_workers,
                          drop_last=True,
                          pin_memory=pin_memory,sampler=valid_sampler)
@@ -281,21 +281,21 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print("train running median:",running_median/num_samples)
 
 
-    # # save the model check point every N epoch
-    # if epoch % saveModelInterval==0:
-    #     filename = os.path.join(CHECKPOINT_DIR,'check-point-epoch-{:04d}.pth'.format(epoch))
-    #     if torch.cuda.device_count() > 1:
-    #         model_params = model.module.state_dict()  # Saving nn.DataParallel model
-    #     else:
-    #         model_params = model.state_dict()
-    #     torch.save(
-    #         {
-    #             'model_state_dict': model_params,
-    #             'optimizer_state_dict': optimizer.state_dict(),
-    #             'epoch': epoch,
-    #             'total_iter_num': total_iter_num,
-    #             'epoch_loss': epoch_loss,
-    #         }, filename)
+    # save the model check point every N epoch
+    if epoch % saveModelInterval==0:
+        filename = os.path.join(CHECKPOINT_DIR,'check-point-epoch-{:04d}.pth'.format(epoch))
+        if torch.cuda.device_count() > 1:
+            model_params = model.module.state_dict()  # Saving nn.DataParallel model
+        else:
+            model_params = model.state_dict()
+        torch.save(
+            {
+                'model_state_dict': model_params,
+                'optimizer_state_dict': optimizer.state_dict(),
+                'epoch': epoch,
+                'total_iter_num': total_iter_num,
+                'epoch_loss': epoch_loss,
+            }, filename)
 
 
 
@@ -309,7 +309,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     running_median = 0
     for iter_num, sample_batched in enumerate(tqdm(testLoader)):
         # print('')
-        inputs_t, label_t = sample_batched
+        inputs_t, label_t,mask_t = sample_batched
         inputs_t = inputs_t.to(device)
         label_t = label_t.to(device)
 
@@ -329,6 +329,18 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
         running_mean += loss_deg_mean.item()
         running_median += loss_deg_median.item()
         running_loss += loss.item()
+
+        # save validation pictures
+        label_t_rgb = label_t.numpy().squeeze(0).transpose(1, 2, 0)
+        label_t_rgb = API.utils.normal_to_rgb(label_t_rgb)
+        predict_norm = normal_vectors_norm.numpy().squeeze(0).transpose(1, 2, 0)
+        mask_t = mask_t.squeeze(1)
+        predict_norm[mask_t.squeeze(0) == 0, :] = -1
+        predict_norm_rgb = API.utils.normal_to_rgb(predict_norm)
+        API.utils.png_saver(os.path.join('/home/zjw/smq/SurfaceNormals/results', str(iter_num).zfill(3) + '-label.png'),
+                            label_t_rgb)
+        API.utils.png_saver(os.path.join('/home/zjw/smq/SurfaceNormals/results', str(iter_num).zfill(3) + '-predict.png'),
+                            predict_norm_rgb)
 
 
     num_samples = len(testLoader)
