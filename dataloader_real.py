@@ -38,22 +38,21 @@ class RealSurfaceNormalsDataset(Dataset):
         input_only (list, str): List of transforms that are to be applied only to the input img
     """
 
-    def __init__(self, input_I_sum_dir, input_normal_dir, label_dir, mask_dir=None, transform=None, input_only=None):
+    def __init__(self, input_I_sum_dir, label_dir,dolp_dir=None,aolp_dir=None, mask_dir=None, transform=None, input_only=None):
         self.input_I_sum_dir = input_I_sum_dir  # rgb path is used to calculate intensity image(rgb2grey)
-        self.input_norm_dir = input_normal_dir
+        self.dolp_dir = dolp_dir
+        self.aolp_dir = aolp_dir
         self.labels_dir = label_dir
         self.masks_dir = mask_dir
         self.transform = transform
         self.input_only = input_only
 
         # Create list of filenames
-        self._datalist_input_normal_0 = []
-        self._datalist_input_normal_1 = []
-        self._datalist_input_normal_2 = []
-        self._datalist_input_normal_3 = []
         self._datalist_I_sum = []
-        self._datalist_mask = []
+        self._datalist_dolp = []
+        self._datalist_aolp = []
         self._datalist_label = []
+        self._datalist_mask = []
         self._create_lists_filenames()
 
     def __len__(self):
@@ -73,10 +72,10 @@ class RealSurfaceNormalsDataset(Dataset):
         # -- 1、prepare paths
         # all_time = time.time()
         I_sum_path = self._datalist_I_sum[index]
-        norm_0_path = self._datalist_input_normal_0[index]
-        norm_1_path = self._datalist_input_normal_1[index]
-        norm_2_path = self._datalist_input_normal_2[index]
-        norm_3_path = self._datalist_input_normal_3[index]
+        if(self.dolp_dir is not None):
+            dolpPath = self._datalist_dolp[index]
+        if(self.aolp_dir is not None):
+            aolpPath = self._datalist_aolp[index]
 
         if(self.masks_dir is not None):
             mask_path = self._datalist_mask[index]
@@ -93,10 +92,10 @@ class RealSurfaceNormalsDataset(Dataset):
         # print('')
         # -- 2、load imgs
         I_sum_path = imageio.imread(I_sum_path)  # numpy array shape is (height, width)
-        norm_0 = API.utils.rgb_loader(norm_0_path)  # numpy array shape is (height, width, 3)
-        norm_1 = API.utils.rgb_loader(norm_1_path)
-        norm_2 = API.utils.rgb_loader(norm_2_path)
-        norm_3 = API.utils.rgb_loader(norm_3_path)
+        if(self.dolp_dir is not None):
+            dolpImg = API.utils.rgb_loader(dolpPath)  # numpy array shape is (height, width, 3)
+        if(self.aolp_dir is not None):
+            aolpImg = API.utils.rgb_loader(aolpPath)
         if(self.masks_dir is not None):
             mask_img = API.utils.mask_loader(mask_path)
         label_img = API.utils.rgb_loader(label_path).transpose(2, 0, 1) # To( C,H,W)
@@ -106,12 +105,15 @@ class RealSurfaceNormalsDataset(Dataset):
         # start = time.time()
         height = I_sum_path.shape[0]
         width = I_sum_path.shape[1]
-        input_img_arr = numpy.zeros([13, height, width], dtype=np.uint8)  # shape is (13 x H x W)
-        input_img_arr[0, :, :] = I_sum_path
-        input_img_arr[1:4, :, :] = norm_0.transpose(2, 0, 1)  # 3 x H x W
-        input_img_arr[4:7, :, :] = norm_1.transpose(2, 0, 1)
-        input_img_arr[7:10, :, :] = norm_2.transpose(2, 0, 1)
-        input_img_arr[10:13, :, :] = norm_3.transpose(2, 0, 1)
+        if(self.aolp_dir is not None and self.dolp_dir is not None):
+            input_img_arr = numpy.zeros([3, height, width], dtype=np.uint8)  # shape is (3 x H x W)
+            input_img_arr[0, :, :] = I_sum_path
+            input_img_arr[1, :, :] = dolpImg
+            input_img_arr[2, :, :] = aolpImg
+        else:
+            input_img_arr = numpy.zeros([1,height,width],dtype=np.uint8)
+            input_img_arr[0,:,:] = I_sum_path
+
         # print("concat time",time.time()-start)
 
         # -- 5、apply mask to inputs and label
@@ -193,9 +195,14 @@ class RealSurfaceNormalsDataset(Dataset):
         '''
         assert os.path.isdir(self.input_I_sum_dir), 'Dataloader given rgb I_sum_dir directory that does not exist: "%s"' % (
             self.input_I_sum_dir)
-        assert os.path.isdir(
-            self.input_norm_dir), 'Dataloader given input norm  directory that does not exist: "%s"' % (
-            self.input_norm_dir)
+        if(self.dolp_dir is not None):
+            assert os.path.isdir(
+                self.dolp_dir), 'Dataloader given input DoLP directory that does not exist: "%s"' % (
+                self.dolp_dir)
+        if(self.aolp_dir is not None):
+            assert os.path.isdir(
+                self.aolp_dir), 'Dataloader given input AoLP directory that does not exist: "%s"' % (
+                self.aolp_dir)
         assert os.path.isdir(self.labels_dir), 'Dataloader given labels directory that does not exist: "%s"' % (
             self.labels_dir)
         if(self.masks_dir is not None):
@@ -209,40 +216,22 @@ class RealSurfaceNormalsDataset(Dataset):
         if numISumImages == 0:
             raise ValueError('No rgb images found in given directory. Searched in dir: {} '.format(self.input_I_sum_dir))
 
-        # -- 2、input normal images
-        input_normal_0_search_str = os.path.join(self.input_norm_dir, 'synthesis-normal-0')
-        input_normal_0_search_str = os.path.join(input_normal_0_search_str, '*-normal.png')
-        self._datalist_input_normal_0 = sorted(glob.glob(input_normal_0_search_str))
-        numNorm_0 = len(self._datalist_input_normal_0)
-        if numNorm_0 == 0:
-            raise ValueError('No input normal_0 files found in given directory. Searched in dir: {} '.format(
-                input_normal_0_search_str))
+        # -- 2、input DoLP & AoLP images
+        if(self.dolp_dir is not None):
+            dolp_search_str = os.path.join(self.dolp_dir, '*-DoLP.png')
+            self._datalist_dolp = sorted(glob.glob(dolp_search_str))
+            numDoLP = len(self._datalist_dolp)
+            if numDoLP == 0:
+                raise ValueError('No input DoLP files found in given directory. Searched in dir: {} '.format(
+                    dolp_search_str))
+        if(self.aolp_dir is not None):
+            aolp_search_str = os.path.join(self.aolp_dir, '*-AoLP.png')
+            self._datalist_aolp = sorted(glob.glob(aolp_search_str))
+            numNAoLP = len(self._datalist_aolp)
+            if numNAoLP == 0:
+                raise ValueError('No input AoLP files found in given directory. Searched in dir: {} '.format(
+                    aolp_search_str))
 
-        input_normal_1_search_str = os.path.join(self.input_norm_dir, 'synthesis-normal-1')
-        input_normal_1_search_str = os.path.join(input_normal_1_search_str, '*-normal.png')
-        self._datalist_input_normal_1 = sorted(glob.glob(input_normal_1_search_str))
-        numNorm_1 = len(self._datalist_input_normal_1)
-        if numNorm_1 == 0:
-            raise ValueError('No input normal_1 files found in given directory. Searched in dir: {} '.format(
-                input_normal_1_search_str))
-
-        input_normal_2_search_str = os.path.join(self.input_norm_dir, 'synthesis-normal-2')
-        input_normal_2_search_str = os.path.join(input_normal_2_search_str, '*-normal.png')
-        self._datalist_input_normal_2 = sorted(glob.glob(input_normal_2_search_str))
-        numNorm_2 = len(self._datalist_input_normal_2)
-        if numNorm_2 == 0:
-            raise ValueError('No input normal_2 files found in given directory. Searched in dir: {} '.format(
-                input_normal_2_search_str))
-
-        input_normal_3_search_str = os.path.join(self.input_norm_dir, 'synthesis-normal-3')
-        input_normal_3_search_str = os.path.join(input_normal_3_search_str, '*-normal.png')
-        self._datalist_input_normal_3 = sorted(glob.glob(input_normal_3_search_str))
-        numNorm_3 = len(self._datalist_input_normal_3)
-        if numNorm_3 == 0:
-            raise ValueError('No input normal_3 files found in given directory. Searched in dir: {} '.format(
-                input_normal_3_search_str))
-        if not (numNorm_0 == numNorm_1 == numNorm_2 == numNorm_3):
-            raise ValueError('Numbers of input normals are different.')
 
         # -- 3、labels(real normals)
         labels_search_str = os.path.join(self.labels_dir, '*.png')
@@ -262,9 +251,14 @@ class RealSurfaceNormalsDataset(Dataset):
                     'No input mask files found in given directory. Searched in dir: {} '.format(self.masks_dir))
 
         # -- 5、verify number of every input
-        if not (numISumImages == numNorm_0 == numLabels == numLabels):
-            print(numISumImages, numNorm_0, numNorm_1, numNorm_2, numNorm_3, numMasks, numLabels)
-            raise ValueError('Numbers of inputs(rgb,normal,label,mask) are different.')
+        if(self.aolp_dir is not None and self.dolp_dir is not None):
+            if not (numISumImages == numDoLP==numNAoLP == numMasks == numLabels):
+                print(numISumImages, numDoLP, numNAoLP, numMasks, numLabels)
+                raise ValueError('Numbers of inputs(rgb,dolp,aolp,label,mask) are different.')
+        else:
+            if not (numISumImages == numMasks == numLabels):
+                print(numISumImages, numDoLP, numNAoLP, numMasks, numLabels)
+                raise ValueError('Numbers of inputs(rgb,label,mask) are different.')
 
     def _activator_masks(self, images, augmenter, parents, default):
         '''Used with imgaug to help only apply some augmentations to images and not labels
