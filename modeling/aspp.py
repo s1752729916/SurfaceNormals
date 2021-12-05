@@ -32,7 +32,7 @@ class _ASPPModule(nn.Module):
                 m.bias.data.zero_()
 
 class ASPP(nn.Module):
-    def __init__(self, backbone, output_stride, BatchNorm):
+    def  __init__(self, backbone, output_stride, BatchNorm):
         super(ASPP, self).__init__()
         if backbone == 'drn':
             inplanes = 512

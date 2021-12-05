@@ -63,9 +63,9 @@ class DeepLab(nn.Module):
 
 
 if __name__ == "__main__":
-    model = DeepLab(backbone='resnet50', output_stride=16,num_classes=3)
+    model = DeepLab(backbone='mobilenet', output_stride=16,num_classes=3)
     model.train()
-    input = torch.rand(8, 13, 513, 513)
+    input = torch.rand(8, 3, 513, 513)
     output = model(input)
 
     print(output.size())
