@@ -52,40 +52,53 @@ input_only = [
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
 ######## train dataset concat ########
-dataset_tiny_white_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/I-sum',
-                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/synthesis-normals',
-                                                                         mask_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/masks',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-28/normals-png',transform=augs_train)
-dataset_tiny_white_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/I-sum',
-                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/synthesis-normals',
-                                                                         mask_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/masks',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Tiny-White-Cup-11-30/normals-png',transform=augs_train)
-dataset_plastic_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/I-sum',
-                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/synthesis-normals',
-                                                                         mask_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/masks',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-28/normals-png',transform=augs_train)
-dataset_plastic_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/I-sum',
-                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/synthesis-normals',
-                                                                         mask_dir='/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/masks',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Plastic-Cup-11-30/normals-png',transform=augs_train)
-dataset_middle_round_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/I-sum',
-                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/synthesis-normals',
-                                                                         mask_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/masks',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-28/normals-png',transform=augs_train)
-dataset_middle_round_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/I-sum',
-                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/synthesis-normals',
-                                                                         mask_dir = '/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/masks',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Middle-Round-Cup-11-30/normals-png',transform=augs_train)
-dataset_little_square_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/I-sum',
-                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/synthesis-normals',
-                                                                         mask_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/masks',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-28/normals-png',transform=augs_train)
-dataset_little_square_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/I-sum',
-                                                                         input_normal_dir='/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/synthesis-normals',
-                                                                         mask_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/masks',
-                                                                         label_dir= '/media/zjw/data/smq/samples/End2End/Little-Square-Cup-11-30/normals-png',transform=augs_train)
-db_list = [dataset_tiny_white_cup_11_28,dataset_tiny_white_cup_11_30,dataset_plastic_cup_11_28,dataset_plastic_cup_11_30,dataset_middle_round_cup_11_28,dataset_middle_round_cup_11_30,dataset_little_square_cup_11_28,dataset_little_square_cup_11_30]
+dataset_tiny_white_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End/Tiny-White-Cup-11-28/I-sum',
+                                                                         input_normal_dir='/home/zjw/smq/samples/End2End/Tiny-White-Cup-11-28/synthesis-normals',
+                                                                         mask_dir= '/home/zjw/smq/samples/End2End/Tiny-White-Cup-11-28/masks',
+                                                                         label_dir= '/home/zjw/smq/samples/End2End/Tiny-White-Cup-11-28/normals-png',transform=augs_train)
+dataset_tiny_white_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End/Tiny-White-Cup-11-30/I-sum',
+                                                                         input_normal_dir='/home/zjw/smq/samples/End2End/Tiny-White-Cup-11-30/synthesis-normals',
+                                                                         mask_dir= '/home/zjw/smq/samples/End2End/Tiny-White-Cup-11-30/masks',
+                                                                         label_dir= '/home/zjw/smq/samples/End2End/Tiny-White-Cup-11-30/normals-png',transform=augs_train)
+dataset_plastic_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End/Plastic-Cup-11-28/I-sum',
+                                                                         input_normal_dir='/home/zjw/smq/samples/End2End/Plastic-Cup-11-28/synthesis-normals',
+                                                                         mask_dir='/home/zjw/smq/samples/End2End/Plastic-Cup-11-28/masks',
+                                                                         label_dir= '/home/zjw/smq/samples/End2End/Plastic-Cup-11-28/normals-png',transform=augs_train)
+dataset_plastic_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End/Plastic-Cup-11-30/I-sum',
+                                                                         input_normal_dir='/home/zjw/smq/samples/End2End/Plastic-Cup-11-30/synthesis-normals',
+                                                                         mask_dir='/home/zjw/smq/samples/End2End/Plastic-Cup-11-30/masks',
+                                                                         label_dir= '/home/zjw/smq/samples/End2End/Plastic-Cup-11-30/normals-png',transform=augs_train)
+dataset_middle_round_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End/Middle-Round-Cup-11-28/I-sum',
+                                                                         input_normal_dir='/home/zjw/smq/samples/End2End/Middle-Round-Cup-11-28/synthesis-normals',
+                                                                         mask_dir='/home/zjw/smq/samples/End2End/Middle-Round-Cup-11-28/masks',
+                                                                         label_dir= '/home/zjw/smq/samples/End2End/Middle-Round-Cup-11-28/normals-png',transform=augs_train)
+dataset_middle_round_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End/Middle-Round-Cup-11-30/I-sum',
+                                                                         input_normal_dir='/home/zjw/smq/samples/End2End/Middle-Round-Cup-11-30/synthesis-normals',
+                                                                         mask_dir = '/home/zjw/smq/samples/End2End/Middle-Round-Cup-11-30/masks',
+                                                                         label_dir= '/home/zjw/smq/samples/End2End/Middle-Round-Cup-11-30/normals-png',transform=augs_train)
+dataset_little_square_cup_11_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End/Little-Square-Cup-11-28/I-sum',
+                                                                         input_normal_dir='/home/zjw/smq/samples/End2End/Little-Square-Cup-11-28/synthesis-normals',
+                                                                         mask_dir= '/home/zjw/smq/samples/End2End/Little-Square-Cup-11-28/masks',
+                                                                         label_dir= '/home/zjw/smq/samples/End2End/Little-Square-Cup-11-28/normals-png',transform=augs_train)
+dataset_little_square_cup_11_30 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End/Little-Square-Cup-11-30/I-sum',
+                                                                         input_normal_dir='/home/zjw/smq/samples/End2End/Little-Square-Cup-11-30/synthesis-normals',
+                                                                         mask_dir= '/home/zjw/smq/samples/End2End/Little-Square-Cup-11-30/masks',
+                                                                         label_dir= '/home/zjw/smq/samples/End2End/Little-Square-Cup-11-30/normals-png',transform=augs_train)
+
+dataset_middle_white_cup_12_6 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End/Middle-White-Cup-12-6/I-sum',
+                                                                          input_normal_dir='/home/zjw/smq/samples/End2End/Middle-White-Cup-12-6/synthesis-normals',
+                                                                         mask_dir= '/home/zjw/smq/samples/End2End/Middle-White-Cup-12-6/masks',
+                                                                         label_dir= '/home/zjw/smq/samples/End2End/Middle-White-Cup-12-6/normals-png',transform=augs_train)
+dataset_middle_white_cup_12_7 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End/Middle-White-Cup-12-7/I-sum',
+                                                                          input_normal_dir = '/home/zjw/smq/samples/End2End/Middle-White-Cup-12-7/synthesis-normals',
+                                                                         mask_dir= '/home/zjw/smq/samples/End2End/Middle-White-Cup-12-7/masks',
+                                                                         label_dir= '/home/zjw/smq/samples/End2End/Middle-White-Cup-12-7/normals-png',transform=augs_train)
+
+db_list = [dataset_tiny_white_cup_11_28,dataset_tiny_white_cup_11_30,dataset_middle_round_cup_11_28,dataset_middle_round_cup_11_30,dataset_little_square_cup_11_28,dataset_little_square_cup_11_30,dataset_middle_white_cup_12_6,dataset_middle_white_cup_12_7]
+db_test_list = [dataset_plastic_cup_11_28,dataset_plastic_cup_11_30,]
+
 dataset = torch.utils.data.ConcatDataset(db_list)
+dataset_test = torch.utils.data.ConcatDataset(db_test_list)
 
 
 #-- 2、create dataloader
@@ -105,12 +118,12 @@ trainLoader = DataLoader(dataset,
                          num_workers=num_workers,
                          batch_size=batch_size,
                          drop_last=True,
-                         pin_memory=pin_memory,sampler=train_sampler)
-testLoader = DataLoader(dataset,
+                         pin_memory=pin_memory)
+testLoader = DataLoader(dataset_test,
                          batch_size=1,
                          num_workers=num_workers,
                          drop_last=True,
-                         pin_memory=pin_memory,sampler=valid_sampler)
+                         pin_memory=pin_memory)
 
 
 print("trainLoader size:",trainLoader.__len__()*trainLoader.batch_size)
@@ -157,7 +170,7 @@ verbose: True
 #-- 2、create optimizer
 optimizer = torch.optim.SGD(model.parameters(),
                             lr=float(learningRate),
-                            momentum=float(momentum),
+                            momentum = momentum,
                             weight_decay=float(weightDecay))
 
 #-- 3、create learningRate schduler
@@ -319,6 +332,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
         normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
         loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum')
         loss /= batch_size
+
         # calcute metrics
         inputs_t = inputs_t.detach().cpu()
         label_t = label_t.detach().cpu()

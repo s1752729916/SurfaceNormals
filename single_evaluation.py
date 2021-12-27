@@ -21,7 +21,7 @@ import loss_functions
 
 
 # define paths
-I_sum_path = '/home/zjw/smq/SurfaceNormals/test/333_MONO_8bit_Angle_001_Sum.tif'
+I_sum_path = '/home/zjw/smq/SurfaceNormals/test/12_8_MONO_8bit_Angle_001_Sum.tif'
 normal_0_path = '/home/zjw/smq/SurfaceNormals/test/normal_0.png'
 normal_1_path = '/home/zjw/smq/SurfaceNormals/test/normal_1.png'
 normal_2_path = '/home/zjw/smq/SurfaceNormals/test/normal_2.png'
@@ -60,7 +60,7 @@ model = deeplab.DeepLab(num_classes=numClasses,
 
 #-- 3、load model params
 CHECKPOINT_DIR = '/home/zjw/smq/SurfaceNormals/CheckPoints'
-checkpoint_path = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0000.pth')
+checkpoint_path = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0007.pth')
 
 if not os.path.isfile(checkpoint_path):
     raise ValueError('Invalid path to the given weights file for transfer learning.\

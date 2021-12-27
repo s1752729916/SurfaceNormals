@@ -245,7 +245,7 @@ class RealSurfaceNormalsDataset(Dataset):
             raise ValueError('Numbers of input normals are different.')
 
         # -- 3、labels(real normals)
-        labels_search_str = os.path.join(self.labels_dir, '*.png')
+        labels_search_str = os.path.join(self.labels_dir, 'normal-*.png')
         self._datalist_label = sorted(glob.glob(labels_search_str))
         numLabels = len(self._datalist_label)
         if numLabels == 0:
