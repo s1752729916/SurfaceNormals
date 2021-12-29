@@ -259,7 +259,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
         torch.set_grad_enabled(True)
         normal_vectors = model(inputs_t)
         normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
-        loss = criterion(normal_vectors_norm, label_t.double(),reduction='elementwise_mean')
+        loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum')
         loss /= batch_size
         loss.backward()
         optimizer.step()
@@ -320,7 +320,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
             normal_vectors = model(inputs_t)
 
         normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
-        loss = criterion(normal_vectors_norm, label_t.double(),reduction='elementwise_mean')
+        loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum')
         loss /= batch_size
 
         # calcute metrics
