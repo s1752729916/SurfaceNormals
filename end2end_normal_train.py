@@ -82,16 +82,24 @@ dataset_tiny_white_cup_black_background_12_28 = dataloader_real.RealSurfaceNorma
                                                                          mask_dir='/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
                                                                          label_dir= '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/normals-png',transform=augs_train)
 
-dataset_tiny_white_cup_edges_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/I-sum',
+dataset_tiny_white_cup_edges_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(
                                                                                                 dolp_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
                                                                                                 aolp_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
                                                                          mask_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/masks',
                                                                          label_dir= '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/normals-png',transform=augs_train)
 
+dataset_synthetic_polar_tiny_white_cup_edges = dataloader_real.RealSurfaceNormalsDataset(
+                                                                                         dolp_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup-edges/params/DoLP',
+                                                                                         aolp_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup-edges/params/AoLP',
+                                                                                         mask_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup-edges/masks',
+                                                                                         label_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup-edges/normals-png',
+                                                                                         transform=augs_train
+                                                                                         )
 
+# db_list = [dataset_middle_square_cup_black_background_12_28,dataset_middle_round_cup_black_background_12_28,dataset_plastic_cup_black_background_12_28,dataset_middle_white_cup_black_background_12_28]
 
-db_list = [dataset_middle_square_cup_black_background_12_28,dataset_middle_round_cup_black_background_12_28,dataset_plastic_cup_black_background_12_28,dataset_middle_white_cup_black_background_12_28]
-db_test_list = [dataset_tiny_white_cup_black_background_12_28]
+db_list = [dataset_synthetic_polar_tiny_white_cup_edges]
+db_test_list = [dataset_tiny_white_cup_edges_black_background_12_28]
 
 dataset = torch.utils.data.ConcatDataset(db_list)
 dataset_test = torch.utils.data.ConcatDataset(db_test_list)
