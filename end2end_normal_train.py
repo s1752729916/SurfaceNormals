@@ -15,6 +15,19 @@ import dataloader_real
 import loss_functions
 import numpy as np
 import API.utils
+import numpy as np
+import random
+def setup_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+
+
+# 设置随机数种子
+setup_seed(20)
+
 ###################### DataLoader #############################
 
 #-- 1、 config parameters
@@ -82,24 +95,24 @@ dataset_tiny_white_cup_black_background_12_28 = dataloader_real.RealSurfaceNorma
                                                                          mask_dir='/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
                                                                          label_dir= '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/normals-png',transform=augs_train)
 
-dataset_tiny_white_cup_edges_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(
+dataset_tiny_white_cup_edges_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/I-sum',
                                                                                                 dolp_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
                                                                                                 aolp_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
                                                                          mask_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/masks',
                                                                          label_dir= '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/normals-png',transform=augs_train)
 
-dataset_synthetic_polar_tiny_white_cup_edges = dataloader_real.RealSurfaceNormalsDataset(
-                                                                                         dolp_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup-edges/params/DoLP',
-                                                                                         aolp_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup-edges/params/AoLP',
-                                                                                         mask_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup-edges/masks',
-                                                                                         label_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup-edges/normals-png',
+dataset_synthetic_polar_tiny_white_cup = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup/I-sum',
+                                                                                         dolp_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup/params/DoLP',
+                                                                                         aolp_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup/params/AoLP',
+                                                                                         mask_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup/masks',
+                                                                                         label_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup/normals-png',
                                                                                          transform=augs_train
                                                                                          )
 
-# db_list = [dataset_middle_square_cup_black_background_12_28,dataset_middle_round_cup_black_background_12_28,dataset_plastic_cup_black_background_12_28,dataset_middle_white_cup_black_background_12_28]
+# db_list = [dataset_middle_square_cup_black_background_12_28,dataset_middle_round_cup_black_background_12_28,dataset_middle_white_cup_black_background_12_28,dataset_tiny_white_cup_black_background_12_28,dataset_tiny_white_cup_edges_black_background_12_28]
 
-db_list = [dataset_synthetic_polar_tiny_white_cup_edges]
-db_test_list = [dataset_tiny_white_cup_edges_black_background_12_28]
+db_list = [dataset_synthetic_polar_tiny_white_cup]
+db_test_list = [dataset_tiny_white_cup_black_background_12_28]
 
 dataset = torch.utils.data.ConcatDataset(db_list)
 dataset_test = torch.utils.data.ConcatDataset(db_test_list)
@@ -201,7 +214,7 @@ criterion = loss_functions.loss_fn_cosine
 
 ###################### Train Model #############################
 #-- 1、config parameters
-MAX_EPOCH = 100
+MAX_EPOCH = 50
 saveModelInterval = 1
 CHECKPOINT_DIR = '/home/zjw/smq/SurfaceNormals/CheckPoints'
 total_iter_num = 0
