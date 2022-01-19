@@ -35,12 +35,12 @@ setup_seed(20)
 
 imgHeight = 512
 imgWidth = 512
-batch_size = 8
-num_workers = 8
+batch_size = 16
+num_workers = 16
 validation_split = 0.1
 shuffle_dataset = True
 pin_memory = False
-prefetch_factor = 2
+prefetch_factor = 8
 
     #-- 2、create dataset
 augs_train = iaa.Sequential([
@@ -65,56 +65,115 @@ input_only = [
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
 ######## train dataset concat ########
-dataset_middle_round_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/I-sum',
-                                                                                            dolp_dir = '/home/zjw/smq/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/DoLP',
-                                                                                            aolp_dir = '/home/zjw/smq/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir= '/home/zjw/smq/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/masks',
-                                                                         label_dir= '/home/zjw/smq/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_middle_round_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/I-sum',
+                                                                                            dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/DoLP',
+                                                                                            aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/AoLP',
+                                                                         mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/masks',
+                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/normals-png',transform=augs_train)
 
-dataset_middle_square_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/I-sum',
-                                                                                             dolp_dir = '/home/zjw/smq/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/DoLP',
-                                                                                             aolp_dir = '/home/zjw/smq/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir= '/home/zjw/smq/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/masks',
-                                                                         label_dir= '/home/zjw/smq/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_middle_square_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/I-sum',
+                                                                                             dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/DoLP',
+                                                                                             aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/AoLP',
+                                                                         mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/masks',
+                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/normals-png',transform=augs_train)
 
-dataset_middle_white_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End2/Middle-White-Cup-Black-Background-12-28/I-sum',
-                                                                                            dolp_dir = '/home/zjw/smq/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/DoLP',
-                                                                                            aolp_dir = '/home/zjw/smq/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir='/home/zjw/smq/samples/End2End2/Middle-White-Cup-Black-Background-12-28/masks',
-                                                                         label_dir= '/home/zjw/smq/samples/End2End2/Middle-White-Cup-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_middle_white_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/I-sum',
+                                                                                            dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/DoLP',
+                                                                                            aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/AoLP',
+                                                                         mask_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/masks',
+                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/normals-png',transform=augs_train)
 
-dataset_plastic_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End2/Plastic-Cup-Black-Background-12-28/I-sum',
-                                                                                       dolp_dir = '/home/zjw/smq/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/DoLP',
-                                                                                       aolp_dir = '/home/zjw/smq/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir='/home/zjw/smq/samples/End2End2/Plastic-Cup-Black-Background-12-28/masks',
-                                                                         label_dir= '/home/zjw/smq/samples/End2End2/Plastic-Cup-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_plastic_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/I-sum',
+                                                                                       dolp_dir = '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/DoLP',
+                                                                                       aolp_dir = '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/AoLP',
+                                                                         mask_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/masks',
+                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/normals-png',transform=augs_train)
 
-dataset_tiny_white_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/I-sum',
-                                                                                          dolp_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/DoLP',
-                                                                                          aolp_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir='/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
-                                                                         label_dir= '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_tiny_white_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/I-sum',
+                                                                                          dolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/DoLP',
+                                                                                          aolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/AoLP',
+                                                                         mask_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
+                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/normals-png',transform=augs_train)
 
-dataset_tiny_white_cup_edges_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/I-sum',
-                                                                                                dolp_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
-                                                                                                aolp_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir = '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/masks',
-                                                                         label_dir= '/home/zjw/smq/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_tiny_white_cup_edges_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/I-sum',
+                                                                                                dolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
+                                                                                                aolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
+                                                                         mask_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/masks',
+                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/normals-png',transform=augs_train)
 
-dataset_synthetic_polar_tiny_white_cup = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup/I-sum',
-                                                                                         dolp_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup/params/DoLP',
-                                                                                         aolp_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup/params/AoLP',
-                                                                                         mask_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup/masks',
-                                                                                         label_dir='/home/zjw/smq/samples/synthetic-polar/tiny-white-cup/normals-png',
-                                                                                         transform=augs_train
-                                                                                         )
+# synthetic datasets
+# dataset_synthetic_polar_tiny_white_cup = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/tiny-white-cup/I-sum',
+#                                                                                          dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/tiny-white-cup/params/DoLP',
+#                                                                                          aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/tiny-white-cup/params/AoLP',
+#                                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/tiny-white-cup/masks',
+#                                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/tiny-white-cup/normals-png',
+#                                                                                          transform=augs_train)
+dataset_synthetic_polar_bun_zipper_back = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/I-sum',
+                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/DoLP',
+                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/AoLP',
+                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/masks',
+                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/normals-png',
+                                                                                         transform=augs_train)
+dataset_synthetic_polar_bun_zipper_front = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/I-sum',
+                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/DoLP',
+                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/AoLP',
+                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/masks',
+                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/normals-png',
+                                                                                         transform=augs_train)
+dataset_synthetic_polar_armadillo_back = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/I-sum',
+                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/DoLP',
+                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/AoLP',
+                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/masks',
+                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/normals-png',
+                                                                                         transform=augs_train)
+dataset_synthetic_polar_armadillo_front = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/I-sum',
+                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/DoLP',
+                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/AoLP',
+                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/masks',
+                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/normals-png',
+                                                                                         transform=augs_train)
+dataset_synthetic_polar_dragon_vrip = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/I-sum',
+                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/DoLP',
+                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/AoLP',
+                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/masks',
+                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/normals-png',
+                                                                                         transform=augs_train)
+dataset_synthetic_polar_happy_vrip_back= dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/I-sum',
+                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/DoLP',
+                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/AoLP',
+                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/masks',
+                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/normals-png',
+                                                                                         transform=augs_train)
+dataset_synthetic_polar_happy_vrip_front= dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/I-sum',
+                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/DoLP',
+                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/AoLP',
+                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/masks',
+                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/normals-png',
+                                                                                         transform=augs_train)
+dataset_synthetic_polar_middle_round_cup = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/I-sum',
+                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/DoLP',
+                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/AoLP',
+                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/masks',
+                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/normals-png',
+                                                                                         transform=augs_train)
+dataset_synthetic_polar_bear_front = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/I-sum',
+                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/DoLP',
+                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/AoLP',
+                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/masks',
+                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/normals-png',
+                                                                                         transform=augs_train)
 
-# db_list = [dataset_middle_square_cup_black_background_12_28,dataset_middle_round_cup_black_background_12_28,dataset_middle_white_cup_black_background_12_28,dataset_tiny_white_cup_black_background_12_28,dataset_tiny_white_cup_edges_black_background_12_28]
 
-db_list = [dataset_synthetic_polar_tiny_white_cup]
-db_test_list = [dataset_tiny_white_cup_black_background_12_28]
 
-dataset = torch.utils.data.ConcatDataset(db_list)
+db_list_synthetic  = [dataset_synthetic_polar_bun_zipper_back,dataset_synthetic_polar_bun_zipper_front,dataset_synthetic_polar_armadillo_back,dataset_synthetic_polar_armadillo_front,
+                      dataset_synthetic_polar_dragon_vrip,dataset_synthetic_polar_happy_vrip_back,dataset_synthetic_polar_happy_vrip_front,
+                      dataset_synthetic_polar_middle_round_cup,dataset_synthetic_polar_plastic_cup]
+db_list_real = [dataset_middle_square_cup_black_background_12_28,dataset_middle_round_cup_black_background_12_28,dataset_middle_white_cup_black_background_12_28]
+db_train_list = db_list_synthetic
+
+db_test_list = [dataset_tiny_white_cup_edges_black_background_12_28]
+
+dataset = torch.utils.data.ConcatDataset(db_train_list)
 dataset_test = torch.utils.data.ConcatDataset(db_test_list)
 
 #-- 2、create dataloader
@@ -214,13 +273,13 @@ criterion = loss_functions.loss_fn_cosine
 
 ###################### Train Model #############################
 #-- 1、config parameters
-MAX_EPOCH = 50
-saveModelInterval = 1
-CHECKPOINT_DIR = '/home/zjw/smq/SurfaceNormals/CheckPoints'
+MAX_EPOCH = 100
+saveModelInterval = 5
+CHECKPOINT_DIR = '/home/robotlab/smq/SurfaceNormals/CheckPoints'
 total_iter_num = 0
 START_EPOCH = 0
 continue_train = False
-preCheckPoint = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0002.pth')
+preCheckPoint = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0000.pth')
 
 #-- 2、load check point
 if(continue_train):
@@ -311,10 +370,10 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
             predict_norm[mask_t[0,:,:] == 0, :] = -1
             predict_norm_rgb = API.utils.normal_to_rgb(predict_norm)
             API.utils.png_saver(
-                os.path.join('/home/zjw/smq/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-label.png'),
+                os.path.join('/home/robotlab/smq/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-label.png'),
                 label_t_rgb)
             API.utils.png_saver(
-                os.path.join('/home/zjw/smq/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-predict.png'),
+                os.path.join('/home/robotlab/smq/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-predict.png'),
                 predict_norm_rgb)
 
 
@@ -330,10 +389,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     # save the model check point every N epoch
     if epoch % saveModelInterval==0:
         filename = os.path.join(CHECKPOINT_DIR,'check-point-epoch-{:04d}.pth'.format(epoch))
-        if torch.cuda.device_count() > 1:
-            model_params = model.module.state_dict()  # Saving nn.DataParallel model
-        else:
-            model_params = model.state_dict()
+        model_params = model.state_dict()
         torch.save(
             {
                 'model_state_dict': model_params,
@@ -383,9 +439,9 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
         mask_t = mask_t.squeeze(1)
         predict_norm[mask_t.squeeze(0) == 0, :] = -1
         predict_norm_rgb = API.utils.normal_to_rgb(predict_norm)
-        API.utils.png_saver(os.path.join('/home/zjw/smq/SurfaceNormals/results', str(iter_num).zfill(3) + '-label.png'),
+        API.utils.png_saver(os.path.join('/home/robotlab/smq/SurfaceNormals//results', str(iter_num).zfill(3) + '-label.png'),
                             label_t_rgb)
-        API.utils.png_saver(os.path.join('/home/zjw/smq/SurfaceNormals/results', str(iter_num).zfill(3) + '-predict.png'),
+        API.utils.png_saver(os.path.join('/home/robotlab/smq/SurfaceNormals/results', str(iter_num).zfill(3) + '-predict.png'),
                             predict_norm_rgb)
 
 

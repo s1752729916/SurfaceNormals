@@ -5,7 +5,6 @@ import sys
 import time
 import numpy
 from PIL import Image
-import Imath
 import numpy as np
 
 import torch
@@ -192,6 +191,7 @@ class RealSurfaceNormalsDataset(Dataset):
             return input_tensor, label_tensor, mask_tensor
         else:
             return input_tensor,label_tensor
+
 
     def _create_lists_filenames(self):
         '''Creates a list of filenames of images and labels each in dataset
