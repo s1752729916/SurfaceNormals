@@ -20,7 +20,7 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # from API.utils import exr_loader
-class RealSurfaceNormalsDataset(Dataset):
+class IDASurfaceDataset(Dataset):
     """
     Dataset class for testing model on estimation of surface normals.
     Uses imgaug for image augmentations.
@@ -37,7 +37,7 @@ class RealSurfaceNormalsDataset(Dataset):
         input_only (list, str): List of transforms that are to be applied only to the input img
     """
 
-    def __init__(self,  label_dir,input_I_sum_dir = None,dolp_dir=None,aolp_dir=None, mask_dir=None, transform=None, input_only=None):
+    def __init__(self,  label_dir,input_I_sum_dir,dolp_dir,aolp_dir,mask_dir=None, transform=None, input_only=None):
         self.input_I_sum_dir = input_I_sum_dir  # rgb path is used to calculate intensity image(rgb2grey)
         self.dolp_dir = dolp_dir
         self.aolp_dir = aolp_dir
@@ -70,12 +70,10 @@ class RealSurfaceNormalsDataset(Dataset):
 
         # -- 1、prepare paths
         # all_time = time.time()
-        if(self.input_I_sum_dir is not None):
-            I_sum_path = self._datalist_I_sum[index]
-        if(self.dolp_dir is not None):
-            dolpPath = self._datalist_dolp[index]
-        if(self.aolp_dir is not None):
-            aolpPath = self._datalist_aolp[index]
+        I_sum_path = self._datalist_I_sum[index]
+        dolpPath = self._datalist_dolp[index]
+        aolpPath = self._datalist_aolp[index]
+
 
 
         if(self.masks_dir is not None):
@@ -92,14 +90,10 @@ class RealSurfaceNormalsDataset(Dataset):
         # print(label_path)
         # print('')
         # -- 2、load imgs
-        if(self.input_I_sum_dir is not None):
-            I_sum_path = imageio.imread(I_sum_path)  # numpy array shape is (height, width)
-        if(self.dolp_dir is not None):
-            dolpImg = API.utils.rgb_loader(dolpPath)  # numpy array shape is (height, width, 3)
-        if(self.aolp_dir is not None):
-            aolpImg = API.utils.rgb_loader(aolpPath)
-        if(self.masks_dir is not None):
-            mask_img = API.utils.mask_loader(mask_path)
+        I_sum_path = imageio.imread(I_sum_path)  # numpy array shape is (height, width)
+        dolpImg = API.utils.rgb_loader(dolpPath)  # numpy array shape is (height, width, 3)
+        aolpImg = API.utils.rgb_loader(aolpPath)
+        mask_img = API.utils.mask_loader(mask_path)
         label_img = API.utils.rgb_loader(label_path).transpose(2, 0, 1) # To( C,H,W)
         # print("load time",time.time()-start)
 
@@ -107,21 +101,12 @@ class RealSurfaceNormalsDataset(Dataset):
         # start = time.time()
         height = label_img.shape[1]
         width = label_img.shape[2]
-        if(self.aolp_dir is not None and self.dolp_dir is not None):
-            if(self.input_I_sum_dir is not None):
-                input_img_arr = numpy.zeros([3, height, width], dtype=np.uint8)  # shape is (3 x H x W)
-                input_img_arr[0, :, :] = I_sum_path
-                input_img_arr[1, :, :] = dolpImg
-                input_img_arr[2, :, :] = aolpImg
-            else:
-                input_img_arr = numpy.zeros([2, height, width], dtype=np.uint8)  # shape is (3 x H x W)
-                input_img_arr[0, :, :] = dolpImg
-                input_img_arr[1, :, :] = aolpImg
-        else:
-            input_img_arr = numpy.zeros([1,height,width],dtype=np.uint8)
-            if(self.input_I_sum_dir is not None):
-                input_img_arr[0,:,:] = I_sum_path
-                assert I_sum_path is None , 'At least one input'
+        input_img_arr = numpy.zeros([3, height, width], dtype=np.uint8)  # shape is (3 x H x W)
+        input_img_arr[0, :, :] = I_sum_path
+        input_img_arr[1, :, :] = dolpImg
+        input_img_arr[2, :, :] = aolpImg
+
+
         # print("concat time",time.time()-start)
 
         # -- 5、apply mask to inputs and label
@@ -202,46 +187,35 @@ class RealSurfaceNormalsDataset(Dataset):
             ValueError: No images were found in given directory
             ValueError: Number of images and labels do not match
         '''
-        if(self.input_I_sum_dir is not None):
-            assert os.path.isdir(self.input_I_sum_dir), 'Dataloader given rgb I_sum_dir directory that does not exist: "%s"' % (
-                self.input_I_sum_dir)
-        if(self.dolp_dir is not None):
-            assert os.path.isdir(
-                self.dolp_dir), 'Dataloader given input DoLP directory that does not exist: "%s"' % (
-                self.dolp_dir)
-        if(self.aolp_dir is not None):
-            assert os.path.isdir(
-                self.aolp_dir), 'Dataloader given input AoLP directory that does not exist: "%s"' % (
-                self.aolp_dir)
-        assert os.path.isdir(self.labels_dir), 'Dataloader given labels directory that does not exist: "%s"' % (
-            self.labels_dir)
+        assert os.path.isdir(self.input_I_sum_dir), 'Dataloader given rgb I_sum_dir directory that does not exist: "%s"' % (self.input_I_sum_dir)
+        assert os.path.isdir(self.dolp_dir), 'Dataloader given input DoLP directory that does not exist: "%s"' % (self.dolp_dir)
+        assert os.path.isdir(self.aolp_dir), 'Dataloader given input AoLP directory that does not exist: "%s"' % (self.aolp_dir)
+        assert os.path.isdir(self.labels_dir), 'Dataloader given labels directory that does not exist: "%s"' % (self.labels_dir)
         if(self.masks_dir is not None):
             assert os.path.isdir(
                 self.masks_dir), 'Dataloader given masks_dir images directory that does not exist: "%s"' % (self.masks_dir)
 
-        # -- 1、input I_sum images
-        if(self.input_I_sum_dir is not None):
-            I_sum_path_search_str = os.path.join(self.input_I_sum_dir, '*.png')
-            self._datalist_I_sum = sorted(glob.glob(I_sum_path_search_str))
-            numISumImages = len(self._datalist_I_sum)
-            if numISumImages == 0:
-                raise ValueError('No rgb images found in given directory. Searched in dir: {} '.format(self.input_I_sum_dir))
 
-        # -- 2、input DoLP & AoLP images
-        if(self.dolp_dir is not None):
-            dolp_search_str = os.path.join(self.dolp_dir, '*.png')
-            self._datalist_dolp = sorted(glob.glob(dolp_search_str))
-            numDoLP = len(self._datalist_dolp)
-            if numDoLP == 0:
-                raise ValueError('No input DoLP files found in given directory. Searched in dir: {} '.format(
-                    dolp_search_str))
-        if(self.aolp_dir is not None):
-            aolp_search_str = os.path.join(self.aolp_dir, '*.png')
-            self._datalist_aolp = sorted(glob.glob(aolp_search_str))
-            numNAoLP = len(self._datalist_aolp)
-            if numNAoLP == 0:
-                raise ValueError('No input AoLP files found in given directory. Searched in dir: {} '.format(
-                    aolp_search_str))
+        # -- input I_sum images
+        I_sum_path_search_str = os.path.join(self.input_I_sum_dir, '*.png')
+        self._datalist_I_sum = sorted(glob.glob(I_sum_path_search_str))
+        numISumImages = len(self._datalist_I_sum)
+        if numISumImages == 0:
+            raise ValueError('No rgb images found in given directory. Searched in dir: {} '.format(self.input_I_sum_dir))
+
+        # -- input DoLP & AoLP images
+        dolp_search_str = os.path.join(self.dolp_dir, '*.png')
+        self._datalist_dolp = sorted(glob.glob(dolp_search_str))
+        numDoLP = len(self._datalist_dolp)
+        if numDoLP == 0:
+            raise ValueError('No input DoLP files found in given directory. Searched in dir: {} '.format(
+                dolp_search_str))
+        aolp_search_str = os.path.join(self.aolp_dir, '*.png')
+        self._datalist_aolp = sorted(glob.glob(aolp_search_str))
+        numNAoLP = len(self._datalist_aolp)
+        if numNAoLP == 0:
+            raise ValueError('No input AoLP files found in given directory. Searched in dir: {} '.format(
+                aolp_search_str))
 
 
         # -- 3、labels(real normals)
@@ -262,14 +236,10 @@ class RealSurfaceNormalsDataset(Dataset):
                     'No input mask files found in given directory. Searched in dir: {} '.format(self.masks_dir))
 
         # -- 5、verify number of every input
-        if(self.aolp_dir is not None and self.dolp_dir is not None):
-            if not (numDoLP==numNAoLP == numMasks == numLabels):
+            if not (numISumImages==numDoLP==numNAoLP == numMasks == numLabels):
                 print(numDoLP, numNAoLP, numMasks, numLabels)
-                raise ValueError('Numbers of inputs(rgb,dolp,aolp,label,mask) are different.')
-        else:
-            if not (numMasks == numLabels):
-                print(numDoLP, numNAoLP, numMasks, numLabels)
-                raise ValueError('Numbers of inputs(rgb,label,mask) are different.')
+                raise ValueError('Numbers of inputs(I_sum,dolp,aolp,label,mask) are different.')
+
 
     def _activator_masks(self, images, augmenter, parents, default):
         '''Used with imgaug to help only apply some augmentations to images and not labels

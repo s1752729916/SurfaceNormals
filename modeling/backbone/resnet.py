@@ -2,7 +2,7 @@ import math
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 from modeling.sync_batchnorm.batchnorm import SynchronizedBatchNorm2d
-
+from modeling.deepSfp.feature_extractor import FeatureExtractor
 class Bottleneck(nn.Module):
     expansion = 4
 

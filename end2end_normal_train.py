@@ -8,15 +8,14 @@ import torch
 import torch.nn as nn
 from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader,SubsetRandomSampler
-from torchvision import transforms
 from tqdm import tqdm
 from modeling import deeplab
-import dataloader_real
+from dataloader import dataloaderIDA,dataloaderI,dataloaderIDAN
 import loss_functions
-import numpy as np
 import API.utils
 import numpy as np
 import random
+from evaluation import evaluation
 def setup_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
@@ -36,7 +35,7 @@ setup_seed(20)
 imgHeight = 512
 imgWidth = 512
 batch_size = 16
-num_workers = 16
+num_workers = 64
 validation_split = 0.1
 shuffle_dataset = True
 pin_memory = False
@@ -65,116 +64,164 @@ input_only = [
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
 ######## train dataset concat ########
-dataset_middle_round_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/I-sum',
-                                                                                            dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/DoLP',
-                                                                                            aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/masks',
-                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_middle_round_cup_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/I-sum',
+                                                                                  dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/DoLP',
+                                                                                  aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/AoLP',
+                                                                                  mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/masks',
+                                                                                  label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_middle_square_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/I-sum',
-                                                                                             dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/DoLP',
-                                                                                             aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/masks',
-                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_middle_square_cup_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/I-sum',
+                                                                                   dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/DoLP',
+                                                                                   aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/AoLP',
+                                                                                   mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/masks',
+                                                                                   label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_middle_white_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/I-sum',
-                                                                                            dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/DoLP',
-                                                                                            aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/masks',
-                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_middle_white_cup_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/I-sum',
+                                                                                  dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/DoLP',
+                                                                                  aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/AoLP',
+                                                                                  mask_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/masks',
+                                                                                  label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_plastic_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/I-sum',
-                                                                                       dolp_dir = '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/DoLP',
-                                                                                       aolp_dir = '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/masks',
-                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_plastic_cup_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/I-sum',
+                                                                             dolp_dir = '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/DoLP',
+                                                                             aolp_dir = '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/AoLP',
+                                                                             mask_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/masks',
+                                                                             label_dir= '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_tiny_white_cup_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/I-sum',
-                                                                                          dolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/DoLP',
-                                                                                          aolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
-                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_tiny_white_cup_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/I-sum',
+                                                                                dolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/DoLP',
+                                                                                aolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/AoLP',
+                                                                                mask_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
+                                                                                label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_tiny_white_cup_edges_black_background_12_28 = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/I-sum',
-                                                                                                dolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
-                                                                                                aolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
-                                                                         mask_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/masks',
-                                                                         label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/normals-png',transform=augs_train)
+dataset_tiny_white_cup_edges_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/I-sum',
+                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
+                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
+                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/masks',
+                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/normals-png', transform=augs_train)
+dataset_bird_back_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/I-sum',
+                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/DoLP',
+                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/AoLP',
+                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/masks',
+                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/normals-png', transform=augs_train)
+dataset_bird_front_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/I-sum',
+                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/DoLP',
+                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/AoLP',
+                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/masks',
+                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/normals-png', transform=augs_train)
+dataset_cat_front_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/I-sum',
+                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/DoLP',
+                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/AoLP',
+                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/masks',
+                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/normals-png', transform=augs_train)
+dataset_cat_back_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/I-sum',
+                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/DoLP',
+                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/AoLP',
+                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/masks',
+                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/normals-png', transform=augs_train)
+dataset_hemi_sphere_big_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/I-sum',
+                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/DoLP',
+                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/AoLP',
+                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/masks',
+                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/normals-png', transform=augs_train)
+dataset_hemi_sphere_small_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/I-sum',
+                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/DoLP',
+                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/AoLP',
+                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/masks',
+                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/normals-png', transform=augs_train)
 
 # synthetic datasets
-# dataset_synthetic_polar_tiny_white_cup = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/tiny-white-cup/I-sum',
-#                                                                                          dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/tiny-white-cup/params/DoLP',
-#                                                                                          aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/tiny-white-cup/params/AoLP',
-#                                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/tiny-white-cup/masks',
-#                                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/tiny-white-cup/normals-png',
-#                                                                                          transform=augs_train)
-dataset_synthetic_polar_bun_zipper_back = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/I-sum',
-                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/DoLP',
-                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/AoLP',
-                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/masks',
-                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/normals-png',
-                                                                                         transform=augs_train)
-dataset_synthetic_polar_bun_zipper_front = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/I-sum',
-                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/DoLP',
-                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/AoLP',
-                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/masks',
-                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/normals-png',
-                                                                                         transform=augs_train)
-dataset_synthetic_polar_armadillo_back = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/I-sum',
-                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/DoLP',
-                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/AoLP',
-                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/masks',
-                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/normals-png',
-                                                                                         transform=augs_train)
-dataset_synthetic_polar_armadillo_front = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/I-sum',
-                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/DoLP',
-                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/AoLP',
-                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/masks',
-                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/normals-png',
-                                                                                         transform=augs_train)
-dataset_synthetic_polar_dragon_vrip = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/I-sum',
-                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/DoLP',
-                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/AoLP',
-                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/masks',
-                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/normals-png',
-                                                                                         transform=augs_train)
-dataset_synthetic_polar_happy_vrip_back= dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/I-sum',
-                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/DoLP',
-                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/AoLP',
-                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/masks',
-                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/normals-png',
-                                                                                         transform=augs_train)
-dataset_synthetic_polar_happy_vrip_front= dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/I-sum',
-                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/DoLP',
-                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/AoLP',
-                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/masks',
-                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/normals-png',
-                                                                                         transform=augs_train)
-dataset_synthetic_polar_middle_round_cup = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/I-sum',
-                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/DoLP',
-                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/AoLP',
-                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/masks',
-                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/normals-png',
-                                                                                         transform=augs_train)
-dataset_synthetic_polar_bear_front = dataloader_real.RealSurfaceNormalsDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/I-sum',
-                                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/DoLP',
-                                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/AoLP',
-                                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/masks',
-                                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/normals-png',
-                                                                                         transform=augs_train)
+
+dataset_synthetic_polar_bun_zipper_back = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/I-sum',
+                                                                          dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/DoLP',
+                                                                          aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/AoLP',
+                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/masks',
+                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/normals-png',
+                                                                          transform=augs_train)
+dataset_synthetic_polar_bun_zipper_front = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/I-sum',
+                                                                           dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/DoLP',
+                                                                           aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/AoLP',
+                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/masks',
+                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/normals-png',
+                                                                           transform=augs_train)
+dataset_synthetic_polar_armadillo_back = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/I-sum',
+                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/DoLP',
+                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/AoLP',
+                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/masks',
+                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/normals-png',
+                                                                         transform=augs_train)
+dataset_synthetic_polar_armadillo_front = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/I-sum',
+                                                                          dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/DoLP',
+                                                                          aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/AoLP',
+                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/masks',
+                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/normals-png',
+                                                                          transform=augs_train)
+dataset_synthetic_polar_dragon_vrip = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/I-sum',
+                                                                      dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/DoLP',
+                                                                      aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/AoLP',
+                                                                      mask_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/masks',
+                                                                      label_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/normals-png',
+                                                                      transform=augs_train)
+dataset_synthetic_polar_happy_vrip_back= dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/I-sum',
+                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/DoLP',
+                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/AoLP',
+                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/masks',
+                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/normals-png',
+                                                                         transform=augs_train)
+dataset_synthetic_polar_happy_vrip_front= dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/I-sum',
+                                                                          dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/DoLP',
+                                                                          aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/AoLP',
+                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/masks',
+                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/normals-png',
+                                                                          transform=augs_train)
+dataset_synthetic_polar_middle_round_cup = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/I-sum',
+                                                                           dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/DoLP',
+                                                                           aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/AoLP',
+                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/masks',
+                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/normals-png',
+                                                                           transform=augs_train)
+dataset_synthetic_polar_bear_front = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/I-sum',
+                                                                     dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/DoLP',
+                                                                     aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/AoLP',
+                                                                     mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/masks',
+                                                                     label_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/normals-png',
+                                                                     transform=augs_train)
+dataset_synthetic_polar_cow_front = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/I-sum',
+                                                                    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/DoLP',
+                                                                    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/AoLP',
+                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/masks',
+                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/normals-png',
+                                                                    transform=augs_train)
+dataset_synthetic_polar_cow_back = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/I-sum',
+                                                                   dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/DoLP',
+                                                                   aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/AoLP',
+                                                                   mask_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/masks',
+                                                                   label_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/normals-png',
+                                                                   transform=augs_train)
+dataset_synthetic_polar_pot_back = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/I-sum',
+                                                                   dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/DoLP',
+                                                                   aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/AoLP',
+                                                                   mask_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/masks',
+                                                                   label_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/normals-png',
+                                                                   transform=augs_train)
+dataset_synthetic_polar_pot_front = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/I-sum',
+                                                                   dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/DoLP',
+                                                                   aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/AoLP',
+                                                                   mask_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/masks',
+                                                                   label_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/normals-png',
+                                                                   transform=augs_train)
 
 
 
 db_list_synthetic  = [dataset_synthetic_polar_bun_zipper_back,dataset_synthetic_polar_bun_zipper_front,dataset_synthetic_polar_armadillo_back,dataset_synthetic_polar_armadillo_front,
                       dataset_synthetic_polar_dragon_vrip,dataset_synthetic_polar_happy_vrip_back,dataset_synthetic_polar_happy_vrip_front,
-                      dataset_synthetic_polar_middle_round_cup,dataset_synthetic_polar_plastic_cup]
+                      dataset_synthetic_polar_middle_round_cup,dataset_synthetic_polar_bear_front,dataset_synthetic_polar_cow_front,dataset_synthetic_polar_cow_back,
+                      dataset_synthetic_polar_pot_back,dataset_synthetic_polar_pot_front]
 db_list_real = [dataset_middle_square_cup_black_background_12_28,dataset_middle_round_cup_black_background_12_28,dataset_middle_white_cup_black_background_12_28]
 db_train_list = db_list_synthetic
 
-db_test_list = [dataset_tiny_white_cup_edges_black_background_12_28]
 
 dataset = torch.utils.data.ConcatDataset(db_train_list)
-dataset_test = torch.utils.data.ConcatDataset(db_test_list)
 
 #-- 2、create dataloader
 # Creating data indices for training and validation splits:
@@ -194,15 +241,50 @@ trainLoader = DataLoader(dataset,
                          batch_size=batch_size,
                          drop_last=True,
                          pin_memory=pin_memory)
-testLoader = DataLoader(dataset_test,
+testLoader_tiny_white_cup = DataLoader(dataset_tiny_white_cup_black_background_12_28,
+                         batch_size=1,
+                         num_workers=num_workers,
+                         drop_last=True,
+                         pin_memory=pin_memory)
+testLoader_tiny_white_cup_edges = DataLoader(dataset_tiny_white_cup_edges_black_background_12_28,
+                         batch_size=1,
+                         num_workers=num_workers,
+                         drop_last=True,
+                         pin_memory=pin_memory)
+testLoader_bird_back = DataLoader(dataset_bird_back_1_20,
+                         batch_size=1,
+                         num_workers=num_workers,
+                         drop_last=True,
+                         pin_memory=pin_memory)
+testLoader_bird_front = DataLoader(dataset_bird_front_1_20,
+                         batch_size=1,
+                         num_workers=num_workers,
+                         drop_last=True,
+                         pin_memory=pin_memory)
+testLoader_cat_back = DataLoader(dataset_cat_back_1_20,
+                         batch_size=1,
+                         num_workers=num_workers,
+                         drop_last=True,
+                         pin_memory=pin_memory)
+testLoader_cat_front = DataLoader(dataset_cat_front_1_20,
+                         batch_size=1,
+                         num_workers=num_workers,
+                         drop_last=True,
+                         pin_memory=pin_memory)
+testLoader_hemi_sphere_big = DataLoader(dataset_hemi_sphere_big_1_20,
+                         batch_size=1,
+                         num_workers=num_workers,
+                         drop_last=True,
+                         pin_memory=pin_memory)
+testLoader_hemi_sphere_small = DataLoader(dataset_hemi_sphere_small_1_20,
                          batch_size=1,
                          num_workers=num_workers,
                          drop_last=True,
                          pin_memory=pin_memory)
 
 
+
 print("trainLoader size:",trainLoader.__len__()*trainLoader.batch_size)
-print("testLoader size:",testLoader.__len__()*testLoader.batch_size)
 
 ###################### ModelBuilder #############################
 
@@ -404,48 +486,98 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     ###################### Validation Cycle #############################
     print('\nValidation:')
     print('=' * 10)
+    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
+            testLoader= testLoader_tiny_white_cup_edges,device=device,criterion=criterion,resultPath='/home/robotlab/smq/SurfaceNormals/results/tiny-white-cup-edges')
+    print('tiny-white-cup-edges:\n')
+    print('loss: ',running_loss)
+    print('mean: ',running_mean)
+    print('median: ',running_median)
+    print('percentage_1: ',running_percentage_1)
+    print('percentage_2: ',running_percentage_2)
+    print('percentage_3: ',running_percentage_3)
+    print('=' * 10)
+    print('\n')
 
-    model.eval() # eval mode, freeze params
-    running_loss = 0.0
-    running_mean = 0
-    running_median = 0
-    for iter_num, sample_batched in enumerate(tqdm(testLoader)):
-        # print('')
-        inputs_t, label_t,mask_t = sample_batched
-        inputs_t = inputs_t.to(device)
-        label_t = label_t.to(device)
+    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
+            testLoader= testLoader_tiny_white_cup,device=device,criterion=criterion,resultPath='/home/robotlab/smq/SurfaceNormals/results/tiny-white-cup')
+    print('tiny-white-cup:')
+    print('loss: ',running_loss)
+    print('mean: ',running_mean)
+    print('median: ',running_median)
+    print('percentage_1: ',running_percentage_1)
+    print('percentage_2: ',running_percentage_2)
+    print('percentage_3: ',running_percentage_3)
+    print('=' * 10)
+    print('\n')
 
-        with torch.no_grad():
-            normal_vectors = model(inputs_t)
+    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
+            testLoader= testLoader_bird_front,device=device,criterion=criterion,resultPath='/home/robotlab/smq/SurfaceNormals/results/bird-front')
+    print('bird-front:')
+    print('loss: ',running_loss)
+    print('mean: ',running_mean)
+    print('median: ',running_median)
+    print('percentage_1: ',running_percentage_1)
+    print('percentage_2: ',running_percentage_2)
+    print('percentage_3: ',running_percentage_3)
+    print('=' * 10)
+    print('\n')
 
-        normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
-        loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum')
-        loss /= batch_size
-        # calcute metrics
-        inputs_t = inputs_t.detach().cpu()
-        label_t = label_t.detach().cpu()
-        normal_vectors_norm = normal_vectors_norm.detach().cpu()
+    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
+            testLoader= testLoader_bird_back,device=device,criterion=criterion,resultPath='/home/robotlab/smq/SurfaceNormals/results/bird-back')
+    print('bird-back:')
+    print('loss: ',running_loss)
+    print('mean: ',running_mean)
+    print('median: ',running_median)
+    print('percentage_1: ',running_percentage_1)
+    print('percentage_2: ',running_percentage_2)
+    print('percentage_3: ',running_percentage_3)
+    print('=' * 10)
+    print('\n')
 
-        loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
-            normal_vectors_norm, label_t.double())
-        running_mean += loss_deg_mean.item()
-        running_median += loss_deg_median.item()
-        running_loss += loss.item()
+    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
+            testLoader= testLoader_cat_front,device=device,criterion=criterion,resultPath='/home/robotlab/smq/SurfaceNormals/results/cat-front')
+    print('cat-front:')
+    print('loss: ',running_loss)
+    print('mean: ',running_mean)
+    print('median: ',running_median)
+    print('percentage_1: ',running_percentage_1)
+    print('percentage_2: ',running_percentage_2)
+    print('percentage_3: ',running_percentage_3)
+    print('=' * 10)
+    print('\n')
 
-        # save validation pictures
-        label_t_rgb = label_t.numpy().squeeze(0).transpose(1, 2, 0)
-        label_t_rgb = API.utils.normal_to_rgb(label_t_rgb)
-        predict_norm = normal_vectors_norm.numpy().squeeze(0).transpose(1, 2, 0)
-        mask_t = mask_t.squeeze(1)
-        predict_norm[mask_t.squeeze(0) == 0, :] = -1
-        predict_norm_rgb = API.utils.normal_to_rgb(predict_norm)
-        API.utils.png_saver(os.path.join('/home/robotlab/smq/SurfaceNormals//results', str(iter_num).zfill(3) + '-label.png'),
-                            label_t_rgb)
-        API.utils.png_saver(os.path.join('/home/robotlab/smq/SurfaceNormals/results', str(iter_num).zfill(3) + '-predict.png'),
-                            predict_norm_rgb)
+    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
+            testLoader= testLoader_cat_back,device=device,criterion=criterion,resultPath='/home/robotlab/smq/SurfaceNormals/results/cat-back')
+    print('cat-back:')
+    print('loss: ',running_loss)
+    print('mean: ',running_mean)
+    print('median: ',running_median)
+    print('percentage_1: ',running_percentage_1)
+    print('percentage_2: ',running_percentage_2)
+    print('percentage_3: ',running_percentage_3)
+    print('=' * 10)
+    print('\n')
 
+    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
+            testLoader= testLoader_hemi_sphere_big,device=device,criterion=criterion,resultPath='/home/robotlab/smq/SurfaceNormals/results/hemi-sphere-big')
+    print('hemi-sphere-big:')
+    print('loss: ',running_loss)
+    print('mean: ',running_mean)
+    print('median: ',running_median)
+    print('percentage_1: ',running_percentage_1)
+    print('percentage_2: ',running_percentage_2)
+    print('percentage_3: ',running_percentage_3)
+    print('=' * 10)
+    print('\n')
 
-    num_samples = len(testLoader)
-    print("test running loss:",running_loss/num_samples)
-    print("test running mean:",running_mean/num_samples)
-    print("test running median:",running_median/num_samples)
+    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
+            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,resultPath='/home/robotlab/smq/SurfaceNormals/results/hemi-sphere-small')
+    print('hemi-sphere-small:')
+    print('loss: ',running_loss)
+    print('mean: ',running_mean)
+    print('median: ',running_median)
+    print('percentage_1: ',running_percentage_1)
+    print('percentage_2: ',running_percentage_2)
+    print('percentage_3: ',running_percentage_3)
+    print('=' * 10)
+    print('\n')

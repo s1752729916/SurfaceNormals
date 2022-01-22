@@ -5,20 +5,13 @@ import os
 
 import imageio
 import matplotlib.pyplot as plt
-from termcolor import colored
 import numpy as np
 import torch
 import torch.nn as nn
-from imgaug import augmenters as iaa
-from torch.utils.data import DataLoader,SubsetRandomSampler
 from torchvision import transforms
-from tqdm import tqdm
 
 import API.utils
 from modeling import deeplab
-import dataloader_real
-import loss_functions
-
 
 # define paths
 I_sum_path = '/home/zjw/smq/SurfaceNormals/test/333_MONO_8bit_Angle_001_Sum.tif'
