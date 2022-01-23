@@ -3,14 +3,13 @@
 import os
 
 from termcolor import colored
-
 import torch
 import torch.nn as nn
 from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader,SubsetRandomSampler
 from tqdm import tqdm
 from modeling import deeplab
-from dataloader import dataloaderIDA,dataloaderI,dataloaderIDAN
+from dataloader import dataloaderIDA,dataloaderI,dataloaderIDAN,dataloaderDA,dataloladerN
 import loss_functions
 import API.utils
 import numpy as np
@@ -49,7 +48,7 @@ augs_train = iaa.Sequential([
     # iaa.Flipud(0.5),
     # iaa.Rot90((0, 4)),
     # Blur and Noise
-    # iaa.Sometimes(0.2, iaa.GaussianBlur(sigma=(0, 1.5), name="gaus-blur")),
+    # iaa.Sometimes(0.2, iaa.GaussianBlur(sigma=(0, 1.5), name="gaus-blur")),x`x
     # iaa.Sometimes(0.1, iaa.Grayscale(alpha=(0.0, 1.0), from_colorspace="RGB", name="grayscale")),
     # iaa.Sometimes(0.2, iaa.AdditiveLaplaceNoise(scale=(0, 0.1*255), per_channel=True, name="gaus-noise")),
 
@@ -64,149 +63,99 @@ input_only = [
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
 ######## train dataset concat ########
-dataset_middle_round_cup_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/I-sum',
-                                                                                  dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/DoLP',
-                                                                                  aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/AoLP',
+dataset_middle_round_cup_black_background_12_28 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/synthesis-normals',
                                                                                   mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/masks',
                                                                                   label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_middle_square_cup_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/I-sum',
-                                                                                   dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/DoLP',
-                                                                                   aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/AoLP',
+dataset_middle_square_cup_black_background_12_28 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/synthesis-normals',
                                                                                    mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/masks',
                                                                                    label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_middle_white_cup_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/I-sum',
-                                                                                  dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/DoLP',
-                                                                                  aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/AoLP',
+dataset_middle_white_cup_black_background_12_28 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/synthesis-normals',
                                                                                   mask_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/masks',
                                                                                   label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_plastic_cup_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/I-sum',
-                                                                             dolp_dir = '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/DoLP',
-                                                                             aolp_dir = '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/AoLP',
+dataset_plastic_cup_black_background_12_28 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/synthesis-normals',
                                                                              mask_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/masks',
                                                                              label_dir= '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_tiny_white_cup_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/I-sum',
-                                                                                dolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/DoLP',
-                                                                                aolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/AoLP',
+dataset_tiny_white_cup_black_background_12_28 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/synthesis-normals',
                                                                                 mask_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
                                                                                 label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_tiny_white_cup_edges_black_background_12_28 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/I-sum',
-                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
-                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
+dataset_tiny_white_cup_edges_black_background_12_28 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/normals-png', transform=augs_train)
-dataset_bird_back_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/I-sum',
-                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/DoLP',
-                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/AoLP',
+dataset_bird_back_1_20 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/normals-png', transform=augs_train)
-dataset_bird_front_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/I-sum',
-                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/DoLP',
-                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/AoLP',
+dataset_bird_front_1_20 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/normals-png', transform=augs_train)
-dataset_cat_front_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/I-sum',
-                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/DoLP',
-                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/AoLP',
+dataset_cat_front_1_20 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/normals-png', transform=augs_train)
-dataset_cat_back_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/I-sum',
-                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/DoLP',
-                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/AoLP',
+dataset_cat_back_1_20 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/normals-png', transform=augs_train)
-dataset_hemi_sphere_big_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/I-sum',
-                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/DoLP',
-                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/AoLP',
+dataset_hemi_sphere_big_1_20 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/normals-png', transform=augs_train)
-dataset_hemi_sphere_small_1_20 = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/I-sum',
-                                                                                      dolp_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/DoLP',
-                                                                                      aolp_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/AoLP',
+dataset_hemi_sphere_small_1_20 = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/normals-png', transform=augs_train)
 
 # synthetic datasets
 
-dataset_synthetic_polar_bun_zipper_back = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/I-sum',
-                                                                          dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/DoLP',
-                                                                          aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/AoLP',
+dataset_synthetic_polar_bun_zipper_back = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/synthesis-normals',
                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/masks',
                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_bun_zipper_front = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/I-sum',
-                                                                           dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/DoLP',
-                                                                           aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/AoLP',
+dataset_synthetic_polar_bun_zipper_front = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/synthesis-normals',
                                                                            mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/masks',
                                                                            label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/normals-png',
                                                                            transform=augs_train)
-dataset_synthetic_polar_armadillo_back = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/I-sum',
-                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/DoLP',
-                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/AoLP',
+dataset_synthetic_polar_armadillo_back = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/synthesis-normals',
                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/masks',
                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/normals-png',
                                                                          transform=augs_train)
-dataset_synthetic_polar_armadillo_front = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/I-sum',
-                                                                          dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/DoLP',
-                                                                          aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/AoLP',
+dataset_synthetic_polar_armadillo_front = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/synthesis-normals',
                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/masks',
                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_dragon_vrip = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/I-sum',
-                                                                      dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/DoLP',
-                                                                      aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/AoLP',
+dataset_synthetic_polar_dragon_vrip = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/synthesis-normals',
                                                                       mask_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/masks',
                                                                       label_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/normals-png',
                                                                       transform=augs_train)
-dataset_synthetic_polar_happy_vrip_back= dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/I-sum',
-                                                                         dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/DoLP',
-                                                                         aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/AoLP',
+dataset_synthetic_polar_happy_vrip_back= dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/synthesis-normals',
                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/masks',
                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/normals-png',
                                                                          transform=augs_train)
-dataset_synthetic_polar_happy_vrip_front= dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/I-sum',
-                                                                          dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/DoLP',
-                                                                          aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/AoLP',
+dataset_synthetic_polar_happy_vrip_front= dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/synthesis-normals',
                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/masks',
                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_middle_round_cup = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/I-sum',
-                                                                           dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/DoLP',
-                                                                           aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/AoLP',
+dataset_synthetic_polar_middle_round_cup = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/synthesis-normals',
                                                                            mask_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/masks',
                                                                            label_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/normals-png',
                                                                            transform=augs_train)
-dataset_synthetic_polar_bear_front = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/I-sum',
-                                                                     dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/DoLP',
-                                                                     aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/AoLP',
+dataset_synthetic_polar_bear_front = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/synthesis-normals',
                                                                      mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/masks',
                                                                      label_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/normals-png',
                                                                      transform=augs_train)
-dataset_synthetic_polar_cow_front = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/I-sum',
-                                                                    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/DoLP',
-                                                                    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/AoLP',
+dataset_synthetic_polar_cow_front = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/synthesis-normals',
                                                                     mask_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/masks',
                                                                     label_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/normals-png',
                                                                     transform=augs_train)
-dataset_synthetic_polar_cow_back = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/I-sum',
-                                                                   dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/DoLP',
-                                                                   aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/AoLP',
+dataset_synthetic_polar_cow_back = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/synthesis-normals',
                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/masks',
                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/normals-png',
                                                                    transform=augs_train)
-dataset_synthetic_polar_pot_back = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/I-sum',
-                                                                   dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/DoLP',
-                                                                   aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/AoLP',
+dataset_synthetic_polar_pot_back = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/synthesis-normals',
                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/masks',
                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/normals-png',
                                                                    transform=augs_train)
-dataset_synthetic_polar_pot_front = dataloaderIDA.IDASurfaceDataset(input_I_sum_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/I-sum',
-                                                                   dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/DoLP',
-                                                                   aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/AoLP',
+dataset_synthetic_polar_pot_front = dataloladerN.NSurfaceDataset(synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/synthesis-normals',
                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/masks',
                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/normals-png',
                                                                    transform=augs_train)
@@ -300,6 +249,7 @@ model = deeplab.DeepLab(num_classes=numClasses,
                         sync_bn=sync_bn,
                         freeze_bn=False)
 
+
 #-- 3、Enable GPU for training
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = torch.device("cpu")
@@ -355,7 +305,7 @@ criterion = loss_functions.loss_fn_cosine
 
 ###################### Train Model #############################
 #-- 1、config parameters
-MAX_EPOCH = 100
+MAX_EPOCH = 50
 saveModelInterval = 5
 CHECKPOINT_DIR = '/home/robotlab/smq/SurfaceNormals/CheckPoints'
 total_iter_num = 0

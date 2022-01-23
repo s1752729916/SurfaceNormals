@@ -2,7 +2,8 @@ import math
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 from modeling.sync_batchnorm.batchnorm import SynchronizedBatchNorm2d
-from modeling.deepSfp.feature_extractor import FeatureExtractor
+from modeling.backbone.espanet import EPSABlock
+
 class Bottleneck(nn.Module):
     expansion = 4
 
@@ -58,7 +59,7 @@ class ResNet(nn.Module):
             raise NotImplementedError
 
         # Modules
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,   # 这里修改输入的通道数
+        self.conv1 = nn.Conv2d(12, 64, kernel_size=7, stride=2, padding=3,   # 这里修改输入的通道数
                                 bias=False)
         self.bn1 = BatchNorm(64)
         self.relu = nn.ReLU(inplace=True)
@@ -84,7 +85,7 @@ class ResNet(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, dilation, downsample, BatchNorm))
+        layers.append(block(self.inplanes, planes, stride = stride, dilation = dilation, downsample = downsample, BatchNorm = BatchNorm))
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
             layers.append(block(self.inplanes, planes, dilation=dilation, BatchNorm=BatchNorm))
@@ -150,20 +151,21 @@ def ResNet101(output_stride, BatchNorm, pretrained=True):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = ResNet(Bottleneck, [3, 4, 23, 3], output_stride, BatchNorm, pretrained=pretrained)
+    model = ResNet(EPSABlock, [3, 4, 23, 3], output_stride, BatchNorm, pretrained=pretrained)
     return model
 def ResNet50(output_stride, BatchNorm, pretrained=True):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = ResNet(Bottleneck, [3, 4, 6, 3], output_stride, BatchNorm, pretrained=pretrained)
+    model = ResNet(EPSABlock, [3, 4, 6, 3], output_stride, BatchNorm, pretrained=pretrained)
     return model
+
 
 if __name__ == "__main__":
     import torch
     model = ResNet50(BatchNorm=nn.BatchNorm2d, pretrained=False, output_stride=8)
-    input = torch.rand(1, 13, 512, 512)
+    input = torch.rand(1, 3, 512, 512)
     output, low_level_feat = model(input)
     print(output.size())
     print(low_level_feat.size())

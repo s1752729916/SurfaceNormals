@@ -10,9 +10,9 @@ from up_sample import UpSample
 from final_layer import FinalLayer
 
 class deepSfp(nn.Module):
-    def __init__(self):
+    def __init__(self,input_channel = 7):
         super(deepSfp, self).__init__()
-        self.feature_extractor = FeatureExtractor(input_channel=7,output_channel=4)
+        self.feature_extractor = FeatureExtractor(input_channel=input_channel,output_channel=4)
         self.down_sample_1 = DownSample(input_channel=4,output_channel=32)
         self.down_sample_2 = DownSample(input_channel=32,output_channel=64)
         self.down_sample_3 = DownSample(input_channel=64,output_channel=128)
@@ -60,6 +60,6 @@ if __name__ == '__main__':
     prior = torch.ones([8,3,256,256])
     polar = torch.ones([8,4,256,256])
 
-    model = deepSfp()
+    model = deepSfp(input_channel=3)
     res = model(polar,prior)
     print(res.shape)
