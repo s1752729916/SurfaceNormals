@@ -21,6 +21,7 @@ class Bottleneck(nn.Module):
         self.stride = stride
         self.dilation = dilation
 
+
     def forward(self, x):
         residual = x
 

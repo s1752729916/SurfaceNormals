@@ -27,18 +27,20 @@ def evaluation(model,testLoader,device,criterion,resultPath = None):
     running_percentage_3 = 0
     for iter_num, sample_batched in enumerate(tqdm(testLoader)):
         # print('')
-        inputs_t, label_t,mask_t = sample_batched
-        inputs_t = inputs_t.to(device)
+        params_t,normals_t, label_t,mask_t = sample_batched
+        params_t = params_t.to(device)
+        normals_t = normals_t.to(device)
+
         label_t = label_t.to(device)
 
         with torch.no_grad():
-            normal_vectors = model(inputs_t)
+            normal_vectors = model(params_t,normals_t)
 
         normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
+        # loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum',device=device)
         loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum')
 
         # calcute metrics
-        inputs_t = inputs_t.detach().cpu()
         label_t = label_t.detach().cpu()
         normal_vectors_norm = normal_vectors_norm.detach().cpu()
 

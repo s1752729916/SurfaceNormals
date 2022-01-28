@@ -7,6 +7,15 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+def my_loss_cosine(input_vec,target_vec,mask_tensor = None,reduction = 'sum',smooth_item = False,device = None):
+    # 输入进来的input_vec是DoLP和AoLP 4个通道的数据，需要转换成正常的余弦损失函数计算所需要的法向量的形式
+    # input_vec -- (batchSize,4,height,width):(sin_theta,cos_theta,sin_phi,cos_phi)
+    new_input = torch.zeros(size=(input_vec.size()[0],3,input_vec.size()[2],input_vec.size()[3])).to(device)
+    new_input[:,0,:,:] = input_vec[:,3,:,:]*input_vec[:,0,:,:]
+    new_input[:,1,:,:] = input_vec[:,2,:,:]*input_vec[:,0,:,:]
+    new_input[:,2,:,:] = input_vec[:,1,:,:]
+
+    return loss_fn_cosine(new_input,target_vec,mask_tensor=mask_tensor,reduction=reduction)
 
 
 def loss_fn_cosine(input_vec, target_vec,mask_tensor = None, reduction='sum'):
@@ -71,6 +80,11 @@ def metric_calculator_batch(input_vec, target_vec, mask=None):
         float: The percentage of pixels with error less than 22.5 degrees
         float: The percentage of pixels with error less than 30 degrees
     """
+    # new_input = torch.zeros(size=(input_vec.size()[0],3,input_vec.size()[2],input_vec.size()[3]))
+    # new_input[:,0,:,:] = input_vec[:,3,:,:]*input_vec[:,0,:,:]
+    # new_input[:,1,:,:] = input_vec[:,2,:,:]*input_vec[:,0,:,:]
+    # new_input[:,2,:,:] = input_vec[:,1,:,:]
+    # input_vec = new_input
     if len(input_vec.shape) != 4:
         raise ValueError('Shape of tensor must be [B, C, H, W]. Got shape: {}'.format(input_vec.shape))
     if len(target_vec.shape) != 4:

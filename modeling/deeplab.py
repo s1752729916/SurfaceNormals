@@ -36,7 +36,7 @@ class DeepLab(nn.Module):
         # x = self.relection_fusion(x,p)
 
         x = F.interpolate(x, size=input.size()[2:], mode='bilinear', align_corners=True)
-
+        x = torch.sin(x)
         return x
 
     def freeze_bn(self):
