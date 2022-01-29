@@ -46,7 +46,7 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, output_stride, BatchNorm, pretrained=True):
+    def __init__(self,in_channels, block, layers, output_stride, BatchNorm, pretrained=True):
         self.inplanes = 64
         super(ResNet, self).__init__()
         blocks = [1, 2, 4]
@@ -60,7 +60,7 @@ class ResNet(nn.Module):
             raise NotImplementedError
 
         # Modules
-        self.conv1 = nn.Conv2d(12, 64, kernel_size=7, stride=2, padding=3,   # 这里修改输入的通道数
+        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3,   # 这里修改输入的通道数
                                 bias=False)
         self.bn1 = BatchNorm(64)
         self.relu = nn.ReLU(inplace=True)
@@ -154,19 +154,12 @@ def ResNet101(output_stride, BatchNorm, pretrained=True):
     """
     model = ResNet(EPSABlock, [3, 4, 23, 3], output_stride, BatchNorm, pretrained=pretrained)
     return model
-def ResNet50(output_stride, BatchNorm, pretrained=True):
+def ResNet50(in_channels,output_stride, BatchNorm, pretrained=True):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = ResNet(EPSABlock, [3, 4, 6, 3], output_stride, BatchNorm, pretrained=pretrained)
+    model = ResNet(in_channels = in_channels,block=EPSABlock, layers = [3, 4, 6, 3], output_stride=output_stride, BatchNorm = BatchNorm, pretrained=pretrained)
     return model
 
 
-if __name__ == "__main__":
-    import torch
-    model = ResNet50(BatchNorm=nn.BatchNorm2d, pretrained=False, output_stride=8)
-    input = torch.rand(1, 3, 512, 512)
-    output, low_level_feat = model(input)
-    print(output.size())
-    print(low_level_feat.size())

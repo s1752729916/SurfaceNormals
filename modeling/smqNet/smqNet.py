@@ -4,6 +4,11 @@ from torch.nn.init import kaiming_normal_
 import modeling.PS_FCN.model_utils as model_utils
 import modeling.utils.SKBlock as SKBlock
 import modeling.utils.ESPABlock as ESPABlock
+import torch.nn.functional as F
+from modeling.sync_batchnorm.batchnorm import SynchronizedBatchNorm2d
+from modeling.aspp import build_aspp
+from modeling.decoder_masks import build_decoder
+from modeling.backbone import build_backbone
 class FeatExtractor(nn.Module):
     def __init__(self, batchNorm=False, c_in=3, other={}):
         super(FeatExtractor, self).__init__()
@@ -51,40 +56,44 @@ class Regressor(nn.Module):
         return normal
 
 class smqNet(nn.Module):
-    def __init__(self, fuse_type='max', batchNorm=True, c_orig = 2,c_prior = 3, other={}):
+    def __init__(self, backbone='resnet', output_stride=16, num_classes=21,
+                 sync_bn=True, freeze_bn=False):
         super(smqNet, self).__init__()
-        self.extractor_orig = FeatExtractor(batchNorm,c_orig,other)
-        self.extractor_prior = FeatExtractor(batchNorm, c_prior, other)
-        self.decoder = Regressor(batchNorm, other)
-        self.fuse_type = fuse_type
-        self.attention_layer = ESPABlock.EPSABlock(inplanes=256,planes=256)
+        if backbone == 'drn':
+            output_stride = 8
 
+        if sync_bn == True:
+            BatchNorm = SynchronizedBatchNorm2d
+        else:
+            BatchNorm = nn.BatchNorm2d
 
-    def forward(self, params,synthesis_normals):
+        self.backbone_orig = build_backbone(in_channels=2,backbone=backbone, output_stride=output_stride, BatchNorm=BatchNorm)
+        self.aspp_orig = build_aspp(backbone, output_stride, BatchNorm)
+        self.backbone_prior = build_backbone(in_channels=12,backbone=backbone, output_stride=output_stride, BatchNorm=BatchNorm)
+        self.aspp_prior = build_aspp(backbone,output_stride,BatchNorm)
+        self.decoder = build_decoder(num_classes, backbone, BatchNorm,double=True)
+        if freeze_bn:
+            self.freeze_bn()
 
-        normals_split = torch.split(synthesis_normals, 3, 1)
+    def forward(self, orig,prior):
+        x_orig, low_level_feat_orig = self.backbone_orig(orig)
+        x_orig = self.aspp_orig(x_orig)
 
-        # extractor_prior
-        feat_orig,shape = self.extractor_orig(params)
+        x_prior, low_level_feat_prior = self.backbone_prior(prior)
+        x_prior = self.aspp_prior(x_prior)
 
-        feat_orig = feat_orig.view(shape[0], shape[1], shape[2], shape[3])
+        x = torch.cat((x_orig,x_prior),1)
+        low_level_feat = torch.cat((low_level_feat_orig,low_level_feat_prior),1)
 
-        # extractor_orig
-        feats = []
-        for i in range(len(normals_split)):
-            net_in = normals_split[i]
-            feat, shape = self.extractor_prior(net_in)
-            feats.append(feat)
-        if self.fuse_type == 'mean':
-            feat_prior = torch.stack(feats, 1).mean(1)
-        elif self.fuse_type == 'max':
-            feat_prior, _ = torch.stack(feats, 1).max(1)
-        feat_prior =  feat_prior.view(shape[0], shape[1], shape[2], shape[3])
+        x = self.decoder(x, low_level_feat)
 
-        # concat features of orig and prior
-        # features = self.attention_layer(feat_orig,feat_prior)
-        features = torch.cat((feat_orig,feat_prior),dim=1)
-        # features = self.attention_layer(features)
-        normal = self.decoder(features, shape)
+        x = F.interpolate(x, size=orig.size()[2:], mode='bilinear', align_corners=True)
+        # x = torch.sin(x)
+        return x
 
-        return normal
+    def freeze_bn(self):
+        for m in self.modules():
+            if isinstance(m, SynchronizedBatchNorm2d):
+                m.eval()
+            elif isinstance(m, nn.BatchNorm2d):
+                m.eval()

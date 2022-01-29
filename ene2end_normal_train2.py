@@ -325,8 +325,7 @@ numClasses = 4
 #                         backbone=backbone_model,
 #                         sync_bn=sync_bn,
 #                         freeze_bn=False)
-model = smqNet()
-
+model = smqNet(backbone = backbone_model,num_classes=3)
 #-- 3、Enable GPU for training
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = torch.device("cpu")
