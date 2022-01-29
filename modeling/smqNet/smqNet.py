@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.nn.init import kaiming_normal_
 import modeling.PS_FCN.model_utils as model_utils
 import modeling.utils.SKBlock as SKBlock
+import modeling.utils.ESPABlock as ESPABlock
 class FeatExtractor(nn.Module):
     def __init__(self, batchNorm=False, c_in=3, other={}):
         super(FeatExtractor, self).__init__()
@@ -31,7 +32,7 @@ class Regressor(nn.Module):
     def __init__(self, batchNorm=False, other={}):
         super(Regressor, self).__init__()
         self.other   = other
-        self.deconv1 = model_utils.conv(batchNorm, 128, 128,  k=3, stride=1, pad=1)
+        self.deconv1 = model_utils.conv(batchNorm, 256, 128,  k=3, stride=1, pad=1)
         self.deconv2 = model_utils.conv(batchNorm, 128, 128,  k=3, stride=1, pad=1)
         self.deconv3 = model_utils.deconv(128, 64)
         self.est_normal= self._make_output(64, 3, k=3, stride=1, pad=1)
@@ -56,7 +57,7 @@ class smqNet(nn.Module):
         self.extractor_prior = FeatExtractor(batchNorm, c_prior, other)
         self.decoder = Regressor(batchNorm, other)
         self.fuse_type = fuse_type
-        self.attention_layer = SKBlock.SKConv(in_channels=128,out_channels=128)
+        self.attention_layer = ESPABlock.EPSABlock(inplanes=256,planes=256)
 
 
     def forward(self, params,synthesis_normals):
@@ -81,8 +82,9 @@ class smqNet(nn.Module):
         feat_prior =  feat_prior.view(shape[0], shape[1], shape[2], shape[3])
 
         # concat features of orig and prior
-        features = self.attention_layer(feat_orig,feat_prior)
-        # features = torch.cat((feat_orig,feat_prior),dim=1)
+        # features = self.attention_layer(feat_orig,feat_prior)
+        features = torch.cat((feat_orig,feat_prior),dim=1)
+        # features = self.attention_layer(features)
         normal = self.decoder(features, shape)
 
         return normal

@@ -1,3 +1,17 @@
+import torch
+import torch.nn as nn
+import math
+from modeling.backbone.SE_weight_module import SEWeightModule
+
+def conv(in_planes, out_planes, kernel_size=3, stride=1, padding=1, dilation=1, groups=1):
+    """standard convolution with padding"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=kernel_size, stride=stride,
+                     padding=padding, dilation=dilation, groups=groups, bias=False)
+
+def conv1x1(in_planes, out_planes, stride=1):
+    """1x1 convolution"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+
 class PSAModule(nn.Module):
 
     def __init__(self, inplans, planes, conv_kernels=[3, 5, 7, 9], stride=1, conv_groups=[1, 4, 8, 16]):
@@ -44,7 +58,7 @@ class PSAModule(nn.Module):
 
 
 class EPSABlock(nn.Module):
-    expansion = 4
+    expansion = 1
 
     def __init__(self, inplanes, planes, stride=1, downsample=None, BatchNorm=None, conv_kernels=[3, 5, 7, 9],
                  conv_groups=[1, 4, 8, 16],dilation = 1):

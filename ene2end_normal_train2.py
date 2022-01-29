@@ -35,7 +35,7 @@ setup_seed(20)
 
 imgHeight = 512
 imgWidth = 512
-batch_size = 8
+batch_size = 6
 num_workers = 2
 validation_split = 0.1
 shuffle_dataset = True
