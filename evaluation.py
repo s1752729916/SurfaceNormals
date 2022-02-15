@@ -14,7 +14,7 @@ import API.utils
 import numpy as np
 import random
 
-def evaluation(model,testLoader,device,criterion,resultPath = None):
+def evaluation(model,testLoader,device,criterion,epoch,resultPath = None,name=None,writer = None):
     ###################### Validation Cycle #############################
 
 
@@ -34,11 +34,12 @@ def evaluation(model,testLoader,device,criterion,resultPath = None):
         label_t = label_t.to(device)
 
         with torch.no_grad():
-            normal_vectors = model(params_t,normals_t)
+            normal_vectors,atten_map = model(params_t,normals_t)
 
-        normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
+        normal_vectors_norm= nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
+        normal_vectors_norm = normal_vectors_norm
         # loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum',device=device)
-        loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum')
+        loss = criterion(normal_vectors_norm, label_t.double(),atten_map = atten_map,reduction='sum',device = device)
 
         # calcute metrics
         label_t = label_t.detach().cpu()
@@ -50,8 +51,8 @@ def evaluation(model,testLoader,device,criterion,resultPath = None):
         running_median += loss_deg_median.item()
         running_loss += loss.item()
         running_percentage_1 += percentage_1.item()
-        running_percentage_2 +=percentage_2.item()
-        running_percentage_3 +=percentage_3.item()
+        running_percentage_2 += percentage_2.item()
+        running_percentage_3 += percentage_3.item()
 
         # save validation pictures
         label_t_rgb = label_t.numpy().squeeze(0).transpose(1, 2, 0)
@@ -60,10 +61,16 @@ def evaluation(model,testLoader,device,criterion,resultPath = None):
         mask_t = mask_t.squeeze(1)
         predict_norm[mask_t.squeeze(0) == 0, :] = -1
         predict_norm_rgb = API.utils.normal_to_rgb(predict_norm)
+        atten_map_rgb = atten_map.detach().cpu().numpy().squeeze(0).transpose(1,2,0)
+        atten_map_rgb = atten_map_rgb*255
+        atten_map_rgb = atten_map_rgb.astype(np.uint8)
         API.utils.png_saver(os.path.join(resultPath, str(iter_num).zfill(3) + '-label.png'),
                             label_t_rgb)
         API.utils.png_saver(os.path.join(resultPath, str(iter_num).zfill(3) + '-predict.png'),
                             predict_norm_rgb)
+        API.utils.png_saver(os.path.join(resultPath, str(iter_num).zfill(3) + '-atten.png'),
+                            atten_map_rgb)
+
     assert testLoader.batch_size == 1, 'testLoader batch size is need to be 1 instead of : "%d"' % (testLoader.batch_size)
 
     numsamples = len(testLoader)
@@ -73,4 +80,12 @@ def evaluation(model,testLoader,device,criterion,resultPath = None):
     running_percentage_1 = running_percentage_1/numsamples
     running_percentage_2 = running_percentage_2/numsamples
     running_percentage_3 = running_percentage_3/numsamples
+    if(writer is not None):
+        writer.add_scalar(name+'/'+'running_mean',running_mean,epoch)
+        writer.add_scalar(name+'/'+'running_median',running_median,epoch)
+        writer.add_scalar(name+'/'+'running_loss',running_loss,epoch)
+        writer.add_scalar(name+'/'+'running_percentage_1',running_percentage_1,epoch)
+        writer.add_scalar(name+'/'+'running_percentage_2',running_percentage_2,epoch)
+        writer.add_scalar(name+'/'+'running_percentage_3',running_percentage_3,epoch)
+
     return running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3
