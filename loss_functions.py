@@ -6,8 +6,11 @@ import math
 import torch
 import torch.nn as nn
 import numpy as np
-
-def my_loss_cosine(input_vec,target_vec,atten_map,mask_tensor = None,reduction = 'sum',smooth_item = False,device = None,):
+import matplotlib.pyplot as plt
+import torch.nn.functional as F
+from losses.TVLoss import TVLoss
+from losses.GradientLoss import Gradient_Net
+def my_loss_cosine(input_vec,target_vec,atten_map,mask_tensor = None,reduction = 'sum',smooth_item = False,device = None,use_atten = False):
     # 输入进来的input_vec是天顶角和方位角2个通道的数据，需要转换成正常的余弦损失函数计算所需要的法向量的形式
     # input_vec -- (batchSize,2,height,width):(sin_theta,cos_theta,sin_phi,cos_phi)
     # new_input = torch.zeros(size=(input_vec.size()[0],3,input_vec.size()[2],input_vec.size()[3])).to(device)
@@ -17,35 +20,10 @@ def my_loss_cosine(input_vec,target_vec,atten_map,mask_tensor = None,reduction =
     new_input = input_vec
 
 
-    return loss_fn_cosine(new_input,target_vec,atten_map = atten_map,mask_tensor=mask_tensor,reduction=reduction,device=device)
-class Gradient_Net(nn.Module):
-  def __init__(self,device):
-    super(Gradient_Net, self).__init__()
-    kernel_x = [[0., 0., 0.],[0., 1., 1.],  [0., 0., 0.]]
-    kernel_x = torch.DoubleTensor(kernel_x).unsqueeze(0).unsqueeze(0)
-    kernel_x = kernel_x.expand(3,3,3,3)
-    kernel_x = kernel_x.to(device)
-
-    kernel_y = [[0., 0., 0.],[0., 1., 0.],  [0., 1., 0.]]
-    kernel_y = torch.DoubleTensor(kernel_y).unsqueeze(0).unsqueeze(0)
-    kernel_y = kernel_y.expand(3,3,3,3)
-    kernel_y = kernel_y.to(device)
-
-    self.weight_x = nn.Parameter(data=kernel_x, requires_grad=False)
-    self.weight_y = nn.Parameter(data=kernel_y, requires_grad=False)
-    self.cos = nn.CosineSimilarity(dim=1, eps=1e-6)
+    return loss_fn_cosine(new_input,target_vec,atten_map = atten_map,mask_tensor=mask_tensor,reduction=reduction,device=device,use_atten = use_atten)
 
 
-  def forward(self, x):
-    x_1_y = nn.functional.conv2d(x, self.weight_x,padding=3//2) - x
-    x_y_1 = nn.functional.conv2d(x, self.weight_y,padding=3//2) - x
-    gradient_x = 1-self.cos(x_1_y,x)
-    gradient_y = 1-self.cos(x_y_1,x)
-
-    gradient = torch.abs(gradient_x) + torch.abs(gradient_y)
-    return gradient
-
-def loss_fn_cosine(input_vec, target_vec,mask_tensor = None, reduction='sum',device = None,atten_map = None):
+def loss_fn_cosine(input_vec, target_vec,mask_tensor, reduction='sum',device = None,atten_map = None,use_atten = False):
     '''A cosine loss function for use with surface normals estimation.
     Calculates the cosine loss between 2 vectors. Both should be of the same size.
     Arguments:
@@ -66,31 +44,58 @@ def loss_fn_cosine(input_vec, target_vec,mask_tensor = None, reduction='sum',dev
         tensor -- A single mean value of cosine loss or a matrix of elementwise cosine loss.
     '''
     atten_map = atten_map.squeeze(1)
+    mask_invalid_pixels = torch.all(mask_tensor<255,dim=1)
+
     cos = nn.CosineSimilarity(dim=1, eps=1e-6)
-    loss_cos = (1.0 - cos(input_vec, target_vec))*(1 + atten_map*5)
+    lamda_1 = 0
+    lamda_2 = 3
+    lamda_3 = 5
+    tvLoss = TVLoss()
+    if(use_atten ==True):
+        loss_cos = (1.0 - cos(input_vec, target_vec))*(1 + atten_map*lamda_2)
+    else:
+        loss_cos = (1.0 - cos(input_vec, target_vec))
 
     # gredient item
-    gradient_model = Gradient_Net(device).to(device)
-    g_target = gradient_model(target_vec)
-    g_output = gradient_model(input_vec)
-    loss_gradient = (g_target-g_output)*(g_target-g_output)*atten_map
-    loss_gradient_sum = loss_gradient.sum()
+    # if(use_atten ==True):
+        # gradient_model = Gradient_Net(device).to(device)
+        # g_target = gradient_model(target_vec)
+        #
+        #
+        # g_output = gradient_model(input_vec)
+        # loss_gradient = (g_target-g_output)*(g_target-g_output)*(1+atten_map*lamda_2)
+        # # temp = input_vec.detach().cpu().numpy()
+        # # temp = temp[0,:,:,:].transpose(1,2,0)
+        # # plt.imshow(temp[:,:,0])
+        # # plt.show()
+        # loss_gradient[mask_invalid_pixels] = 0
+        # loss_gradient_sum = loss_gradient.sum()
+
+        # tv_loss = TVLoss(TVLoss_weight=1)
+        # gradient_model = Gradient_Net(device).to(device)
+        # g_output = gradient_model(input_vec)
+        # loss_gradient = g_output*(1 + atten_map * lamda_2)
 
 
 
+    tv_vector = (target_vec+1)*127.5
+    tv_loss = tvLoss(tv_vector)
 
 
 
 
     # calculate loss only on valid pixels
     # mask_invalid_pixels = (target_vec[:, 0, :, :] == -1.0) & (target_vec[:, 1, :, :] == -1.0) & (target_vec[:, 2, :, :] == -1.0)
-    mask_invalid_pixels = torch.all(target_vec < -1/np.sqrt(3)+1e-4, dim=1)
     # mask_invalid_pixels = torch.all(mask_tensor==0,dim=)
     loss_cos[mask_invalid_pixels] = 0.0
     loss_cos_sum = loss_cos.sum()
     total_valid_pixels = (~mask_invalid_pixels).sum()
     # print(total_valid_pixels)
-    error_sum = loss_cos_sum
+    if(use_atten ==True):
+        error_sum = (loss_cos_sum + 0 + tv_loss*lamda_3)
+    else:
+        error_sum = loss_cos_sum + tv_loss*lamda_3
+
     error_output = error_sum / total_valid_pixels
     if reduction == 'elementwise_mean':
         loss_cos = error_output
@@ -154,6 +159,7 @@ def metric_calculator_batch(input_vec, target_vec, mask=None):
 
     # Mask out all invalid pixels and calc mean, median
     loss_deg = loss_deg[mask_valid_pixels.bool()]
+    temp = torch.min(loss_deg)
     loss_deg_mean = loss_deg.mean()
     loss_deg_median = loss_deg.median()
 
@@ -207,6 +213,7 @@ def metric_calculator(input_vec, target_vec, mask=None):
     loss_deg = loss_rad * (180.0 / math.pi)
 
     # Mask out all invalid pixels and calc mean, median
+    temp = loss_deg[0,:,:,:]
     loss_deg = loss_deg[mask_valid_pixels]
     loss_deg_mean = loss_deg.mean()
     loss_deg_median = loss_deg.median()

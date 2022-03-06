@@ -37,7 +37,7 @@ setup_seed(20)
 
 imgHeight = 512
 imgWidth = 512
-batch_size = 6
+batch_size = 4
 num_workers = 2
 validation_split = 0.1
 shuffle_dataset = True
@@ -320,6 +320,7 @@ print("trainLoader size:",trainLoader.__len__()*trainLoader.batch_size)
 backbone_model = 'resnet50'
 sync_bn = False  # this is for Multi-GPU synchronize batch normalization
 numClasses = 3
+use_atten = True
 
 #-- 2、create model
 
@@ -331,13 +332,12 @@ numClasses = 3
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = smqNet(backbone = backbone_model,num_classes=3,device=device)
+model = smqNet(backbone = backbone_model,num_classes=3,device=device,sync_bn=False)
 #-- 3、Enable GPU for training
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = torch.device("cpu")
+# model = model.to(device)
 model = model.to(device)
 
 
@@ -391,7 +391,7 @@ writer = SummaryWriter()
 
 ###################### Train Model #############################
 #-- 1、config parameters
-MAX_EPOCH = 100
+MAX_EPOCH = 20
 saveModelInterval = 5
 CHECKPOINT_DIR = '/home/robotlab/smq/SurfaceNormals/CheckPoints'
 total_iter_num = 0
@@ -439,6 +439,8 @@ if(continue_train):
                            Starting from epoch num 0', 'red'))
 #-- 3、epoch cycle
 import time
+mean_list = []
+median_list = []
 for epoch in range(START_EPOCH,MAX_EPOCH):
     print('\n\nEpoch {}/{}'.format(epoch, MAX_EPOCH - 1))
     print('-' * 30)
@@ -464,7 +466,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
         normal_vectors,atten_map = model(params_t,normals_t)
         normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
         normal_vectors_norm = normal_vectors_norm
-        loss = criterion(normal_vectors_norm, label_t.double(),atten_map = atten_map,reduction='sum',device=device)
+        loss = criterion(normal_vectors_norm, label_t.double(),mask_tensor=mask_t,atten_map = atten_map,reduction='sum',device=device,use_atten = use_atten)
         loss /= batch_size
         loss.backward()
         optimizer.step()
@@ -529,10 +531,13 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
 
 
     ###################### Validation Cycle #############################
+    mean_all = 0
+    median_all = 0
+    count = 0
     print('\nValidation:')
     print('=' * 10)
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_tiny_white_cup_edges,device=device,criterion=criterion,epoch = epoch,name = 'tiny_white_cup_edges',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/tiny-white-cup-edges')
+            testLoader= testLoader_tiny_white_cup_edges,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup_edges',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/tiny-white-cup-edges')
     print('tiny-white-cup-edges:\n')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -542,9 +547,12 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print('percentage_3: ',running_percentage_3)
     print('=' * 10)
     print('\n')
+    mean_all +=running_mean
+    median_all += running_median
+    count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_tiny_white_cup,device=device,criterion=criterion,epoch = epoch,name = 'tiny_white_cup',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/tiny-white-cup')
+            testLoader= testLoader_tiny_white_cup,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/tiny-white-cup')
     print('tiny-white-cup:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -554,9 +562,12 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print('percentage_3: ',running_percentage_3)
     print('=' * 10)
     print('\n')
+    mean_all +=running_mean
+    median_all += running_median
+    count += 1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_bird_front,device=device,criterion=criterion,epoch = epoch,name = 'bird_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/bird-front')
+            testLoader= testLoader_bird_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/bird-front')
     print('bird-front:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -568,7 +579,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print('\n')
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_bird_back,device=device,criterion=criterion,epoch = epoch,name = 'bird_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/bird-back')
+            testLoader= testLoader_bird_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/bird-back')
     print('bird-back:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -578,9 +589,12 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print('percentage_3: ',running_percentage_3)
     print('=' * 10)
     print('\n')
+    mean_all +=running_mean
+    median_all += running_median
+    count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_cat_front,device=device,criterion=criterion,epoch = epoch,name = 'cat_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/cat-front')
+            testLoader= testLoader_cat_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/cat-front')
     print('cat-front:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -590,9 +604,12 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print('percentage_3: ',running_percentage_3)
     print('=' * 10)
     print('\n')
+    mean_all +=running_mean
+    median_all += running_median
+    count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_cat_back,device=device,criterion=criterion,epoch = epoch,name = 'cat_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/cat-back')
+            testLoader= testLoader_cat_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/cat-back')
     print('cat-back:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -602,9 +619,12 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print('percentage_3: ',running_percentage_3)
     print('=' * 10)
     print('\n')
+    mean_all +=running_mean
+    median_all += running_median
+    count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_hemi_sphere_big,device=device,criterion=criterion,epoch = epoch,name = 'hemi_sphere_big',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/hemi-sphere-big')
+            testLoader= testLoader_hemi_sphere_big,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_big',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/hemi-sphere-big')
     print('hemi-sphere-big:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -614,9 +634,12 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print('percentage_3: ',running_percentage_3)
     print('=' * 10)
     print('\n')
+    mean_all +=running_mean
+    median_all += running_median
+    count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,epoch = epoch,name = 'hemi_sphere_small',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/hemi-sphere-small')
+            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_small',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/hemi-sphere-small')
     print('hemi-sphere-small:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -626,3 +649,11 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print('percentage_3: ',running_percentage_3)
     print('=' * 10)
     print('\n')
+    mean_all +=running_mean
+    median_all += running_median
+    count +=1
+
+    print('all mean: ',mean_all/count)
+    print('all median: ',median_all/count)
+    mean_list.append(mean_all/count)
+    median_list.append(median_all/count)

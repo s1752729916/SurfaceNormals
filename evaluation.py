@@ -14,7 +14,7 @@ import API.utils
 import numpy as np
 import random
 
-def evaluation(model,testLoader,device,criterion,epoch,resultPath = None,name=None,writer = None):
+def evaluation(model,testLoader,device,criterion,epoch,resultPath = None,name=None,writer = None,use_atten = False):
     ###################### Validation Cycle #############################
 
 
@@ -25,6 +25,7 @@ def evaluation(model,testLoader,device,criterion,epoch,resultPath = None,name=No
     running_percentage_1 = 0
     running_percentage_2 = 0
     running_percentage_3 = 0
+    mean_list = []
     for iter_num, sample_batched in enumerate(tqdm(testLoader)):
         # print('')
         params_t,normals_t, label_t,mask_t = sample_batched
@@ -39,7 +40,7 @@ def evaluation(model,testLoader,device,criterion,epoch,resultPath = None,name=No
         normal_vectors_norm= nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
         normal_vectors_norm = normal_vectors_norm
         # loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum',device=device)
-        loss = criterion(normal_vectors_norm, label_t.double(),atten_map = atten_map,reduction='sum',device = device)
+        loss = criterion(normal_vectors_norm, label_t.double(),mask_tensor = mask_t,atten_map = atten_map,reduction='sum',device = device,use_atten = use_atten)
 
         # calcute metrics
         label_t = label_t.detach().cpu()
@@ -49,6 +50,7 @@ def evaluation(model,testLoader,device,criterion,epoch,resultPath = None,name=No
             normal_vectors_norm, label_t.double())
         running_mean += loss_deg_mean.item()
         running_median += loss_deg_median.item()
+        mean_list.append(loss_deg_mean.item())
         running_loss += loss.item()
         running_percentage_1 += percentage_1.item()
         running_percentage_2 += percentage_2.item()
@@ -87,5 +89,5 @@ def evaluation(model,testLoader,device,criterion,epoch,resultPath = None,name=No
         writer.add_scalar(name+'/'+'running_percentage_1',running_percentage_1,epoch)
         writer.add_scalar(name+'/'+'running_percentage_2',running_percentage_2,epoch)
         writer.add_scalar(name+'/'+'running_percentage_3',running_percentage_3,epoch)
-
+    print('mean list:',mean_list)
     return running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3

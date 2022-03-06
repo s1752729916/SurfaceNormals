@@ -9,9 +9,10 @@ from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader,SubsetRandomSampler
 from tqdm import tqdm
 from modeling import deeplab
-from dataloader import dataloaderIDA,dataloaderI,dataloaderIDAN,dataloaderDA,dataloladerN,dataloaderDAN
+from dataloader import dataloaderIDA,dataloaderI,dataloaderIDAN,dataloaderDA,dataloladerN,dataloaderDAN,dataloaderSfP
 from modeling.PS_FCN.PS_FCN import PS_FCN
-from modeling.smqFusion.smqFusion import smqFusion
+from modeling.smqNet.smqNet import smqNet
+from modeling.deepSfp.deepSfp import *
 import loss_functions
 import API.utils
 import numpy as np
@@ -67,172 +68,147 @@ input_only = [
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
 ######## train dataset concat ########
-dataset_middle_round_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/DoLP',
-                                                                                  aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/AoLP',
+dataset_middle_round_cup_black_background_12_28 = dataloaderSfP.SfPSurfaceDataset(input_poar_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28',
                                                                                   synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/synthesis-normals',
                                                                                   mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/masks',
                                                                                   label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_middle_square_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/AoLP',
+dataset_middle_square_cup_black_background_12_28 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/synthesis-normals',
                                                                                    mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/masks',
                                                                                    label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_middle_white_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/AoLP',
+dataset_middle_white_cup_black_background_12_28 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/synthesis-normals',
                                                                                   mask_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/masks',
                                                                                   label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_plastic_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/AoLP',
+dataset_plastic_cup_black_background_12_28 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/synthesis-normals',
                                                                              mask_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/masks',
                                                                              label_dir= '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_tiny_white_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/AoLP',
+dataset_tiny_white_cup_black_background_12_28 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/synthesis-normals',
                                                                                 mask_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
                                                                                 label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_tiny_white_cup_edges_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
+dataset_tiny_white_cup_edges_black_background_12_28 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/normals-png', transform=augs_train)
-dataset_bird_back_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/AoLP',
+dataset_bird_back_1_20 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/normals-png', transform=augs_train)
-dataset_bird_front_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/AoLP',
+dataset_bird_front_1_20 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/normals-png', transform=augs_train)
-dataset_cat_front_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/AoLP',
+dataset_cat_front_1_20 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/normals-png', transform=augs_train)
-dataset_cat_back_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/AoLP',
+dataset_cat_back_1_20 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/normals-png', transform=augs_train)
-dataset_hemi_sphere_big_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/AoLP',
+dataset_hemi_sphere_big_1_20 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/normals-png', transform=augs_train)
-dataset_hemi_sphere_small_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/AoLP',
+dataset_hemi_sphere_small_1_20 = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20',
     synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/synthesis-normals',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/normals-png', transform=augs_train)
 
 # synthetic datasets
 
-dataset_synthetic_polar_bun_zipper_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/AoLP',
+dataset_synthetic_polar_bun_zipper_back = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/synthesis-normals',
                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/masks',
                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_bun_zipper_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/AoLP',
+dataset_synthetic_polar_bun_zipper_front = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/synthesis-normals',
                                                                            mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/masks',
                                                                            label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/normals-png',
                                                                            transform=augs_train)
-dataset_synthetic_polar_armadillo_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/AoLP',
+dataset_synthetic_polar_armadillo_back = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/synthesis-normals',
                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/masks',
                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/normals-png',
                                                                          transform=augs_train)
-dataset_synthetic_polar_armadillo_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/AoLP',
+dataset_synthetic_polar_armadillo_front = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/synthesis-normals',
                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/masks',
                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_dragon_vrip = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/AoLP',
+dataset_synthetic_polar_dragon_vrip = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/synthesis-normals',
                                                                       mask_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/masks',
                                                                       label_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/normals-png',
                                                                       transform=augs_train)
-dataset_synthetic_polar_happy_vrip_back= dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/AoLP',
+dataset_synthetic_polar_happy_vrip_back= dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/synthesis-normals',
                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/masks',
                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/normals-png',
                                                                          transform=augs_train)
-dataset_synthetic_polar_happy_vrip_front= dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/AoLP',
+dataset_synthetic_polar_happy_vrip_front= dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/synthesis-normals',
                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/masks',
                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_middle_round_cup = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/AoLP',
+dataset_synthetic_polar_middle_round_cup = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/synthesis-normals',
                                                                            mask_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/masks',
                                                                            label_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/normals-png',
                                                                            transform=augs_train)
-dataset_synthetic_polar_bear_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/AoLP',
+dataset_synthetic_polar_bear_front = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/synthesis-normals',
                                                                      mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/masks',
                                                                      label_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/normals-png',
                                                                      transform=augs_train)
-dataset_synthetic_polar_cow_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/AoLP',
+dataset_synthetic_polar_cow_front = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/synthesis-normals',
                                                                     mask_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/masks',
                                                                     label_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/normals-png',
                                                                     transform=augs_train)
-dataset_synthetic_polar_cow_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/AoLP',
+dataset_synthetic_polar_cow_back = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/synthesis-normals',
                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/masks',
                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/normals-png',
                                                                    transform=augs_train)
-dataset_synthetic_polar_pot_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/AoLP',
+dataset_synthetic_polar_pot_back = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/synthesis-normals',
                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/masks',
                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/normals-png',
                                                                    transform=augs_train)
-dataset_synthetic_polar_pot_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/AoLP',
+dataset_synthetic_polar_pot_front = dataloaderSfP.SfPSurfaceDataset(
+    input_poar_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front',
     synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/synthesis-normals',
                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/masks',
                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/normals-png',
@@ -320,7 +296,6 @@ print("trainLoader size:",trainLoader.__len__()*trainLoader.batch_size)
 backbone_model = 'resnet50'
 sync_bn = False  # this is for Multi-GPU synchronize batch normalization
 numClasses = 3
-use_atten = False
 
 #-- 2、create model
 
@@ -330,14 +305,15 @@ use_atten = False
 #                         freeze_bn=False)
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = smqFusion(backbone = backbone_model,num_classes=3,device=device,sync_bn=False)
+# model = smqNet(backbone = backbone_model,num_classes=3,device=device)
+model = deepSfp(input_channel=16)
 #-- 3、Enable GPU for training
 
 import os
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = torch.device("cpu")
-# model = model.to(device)
 model = model.to(device)
 
 
@@ -392,11 +368,11 @@ writer = SummaryWriter()
 ###################### Train Model #############################
 #-- 1、config parameters
 MAX_EPOCH = 20
-saveModelInterval = 1
+saveModelInterval = 5
 CHECKPOINT_DIR = '/home/robotlab/smq/SurfaceNormals/CheckPoints'
 total_iter_num = 0
 START_EPOCH = 0
-continue_train = True
+continue_train = False
 preCheckPoint = os.path.join(CHECKPOINT_DIR,'check-point-epoch-0000.pth')
 
 #-- 2、load check point
@@ -437,13 +413,96 @@ if(continue_train):
                 colored(
                     'Could not load epoch and total iter nums from checkpoint, they do not exist in checkpoint.\
                            Starting from epoch num 0', 'red'))
-#-- 3、epoch cycle
 import time
 mean_list = []
 median_list = []
-for epoch in range(0,1):
+use_atten = False
+for epoch in range(START_EPOCH,MAX_EPOCH):
     print('\n\nEpoch {}/{}'.format(epoch, MAX_EPOCH - 1))
     print('-' * 30)
+
+    ###################### Training Cycle #############################
+    print('Train:')
+    print('=' * 10)
+    model.train()  # set model mode to train mode
+
+    running_loss = 0.0
+    running_mean = 0
+    running_median = 0
+    for iter_num,batch  in enumerate(tqdm(trainLoader)):
+        total_iter_num+=1
+        params_t,normals_t, label_t,mask_t = batch
+        params_t = params_t.to(device)
+        normals_t = normals_t.to(device)
+        label_t = label_t.to(device)
+        # Forward + Backward Prop
+        start = time.time()
+        optimizer.zero_grad()
+        torch.set_grad_enabled(True)
+        normal_vectors,atten_map = model(params_t,normals_t)
+        normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
+        normal_vectors_norm = normal_vectors_norm
+        loss = criterion(normal_vectors_norm, label_t.double(),mask_tensor=mask_t,atten_map = atten_map,reduction='sum',device=device,use_atten = use_atten)
+        loss /= batch_size
+        loss.backward()
+        optimizer.step()
+        # print('time consume:',time.time()-start)
+
+        # calcute metrics
+        label_t = label_t.detach().cpu()
+        normal_vectors_norm = normal_vectors_norm.detach().cpu()
+
+        loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
+            normal_vectors_norm.detach().cpu(), label_t.double())
+        running_mean += loss_deg_mean.item()
+        running_median += loss_deg_median.item()
+        running_loss += loss.item()
+
+        #  output train set
+        if(epoch % 10==0):
+            label_t_rgb = label_t.numpy()[0,:,:,:].transpose(1, 2, 0)
+            label_t_rgb = API.utils.normal_to_rgb(label_t_rgb)
+            predict_norm = normal_vectors_norm.numpy()[0,:,:,:].transpose(1, 2, 0)
+            mask_t = mask_t.squeeze(1)
+            predict_norm[mask_t[0,:,:] == 0, :] = -1
+            predict_norm_rgb = API.utils.normal_to_rgb(predict_norm)
+            atten_map = atten_map[0,:,:,:]
+            atten_map_rgb = atten_map.detach().cpu().numpy().transpose(1, 2, 0)
+
+            atten_map_rgb = atten_map_rgb * 255
+            atten_map_rgb = atten_map_rgb.astype(np.uint8)
+            API.utils.png_saver(
+                os.path.join('/home/robotlab/smq/SurfaceNormals/deepSfP/results/train', str(iter_num).zfill(3) + '-label.png'),
+                label_t_rgb)
+            API.utils.png_saver(
+                os.path.join('/home/robotlab/smq/SurfaceNormals/deepSfP/results/train', str(iter_num).zfill(3) + '-predict.png'),
+                predict_norm_rgb)
+            API.utils.png_saver(
+                os.path.join('/home/robotlab/smq/SurfaceNormals/deepSfP/results/train', str(iter_num).zfill(3) + '-atten.png'),
+                atten_map_rgb)
+
+
+        # print('loss_deg_mean:',loss_deg_mean)
+        # print('loss_deg_median:',loss_deg_median)
+    num_samples = (len(trainLoader))
+    epoch_loss = running_loss/num_samples
+    print("train running loss:",epoch_loss)
+    print("train running mean:",running_mean/num_samples)
+    print("train running median:",running_median/num_samples)
+
+
+    # save the model check point every N epoch
+    if epoch % saveModelInterval==0:
+        filename = os.path.join(CHECKPOINT_DIR,'check-point-epoch-{:04d}.pth'.format(epoch))
+        model_params = model.state_dict()
+        torch.save(
+            {
+                'model_state_dict': model_params,
+                'optimizer_state_dict': optimizer.state_dict(),
+                'epoch': epoch,
+                'total_iter_num': total_iter_num,
+                'epoch_loss': epoch_loss,
+            }, filename)
 
 
     ###################### Validation Cycle #############################
@@ -456,7 +515,7 @@ for epoch in range(0,1):
     print('\nValidation:')
     print('=' * 10)
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_tiny_white_cup_edges,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup_edges',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/test/results/tiny-white-cup-edges')
+            testLoader= testLoader_tiny_white_cup_edges,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup_edges',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/comparison/results/tiny-white-cup-edges')
     print('tiny-white-cup-edges:\n')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -475,7 +534,7 @@ for epoch in range(0,1):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_tiny_white_cup,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/test/results/tiny-white-cup')
+            testLoader= testLoader_tiny_white_cup,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/comparison/results/tiny-white-cup')
     print('tiny-white-cup:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -493,7 +552,7 @@ for epoch in range(0,1):
     count += 1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_bird_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/test/results/bird-front')
+            testLoader= testLoader_bird_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/comparison/results/bird-front')
     print('bird-front:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -508,7 +567,7 @@ for epoch in range(0,1):
     print('\n')
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_bird_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/test/results/bird-back')
+            testLoader= testLoader_bird_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/comparison/results/bird-back')
     print('bird-back:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -526,7 +585,7 @@ for epoch in range(0,1):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_cat_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/test/results/cat-front')
+            testLoader= testLoader_cat_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/comparison/results/cat-front')
     print('cat-front:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -544,7 +603,7 @@ for epoch in range(0,1):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_cat_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/test/results/cat-back')
+            testLoader= testLoader_cat_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/comparison/results/cat-back')
     print('cat-back:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -562,7 +621,7 @@ for epoch in range(0,1):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_hemi_sphere_big,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_big',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/test/results/hemi-sphere-big')
+            testLoader= testLoader_hemi_sphere_big,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_big',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/comparison/results/hemi-sphere-big')
     print('hemi-sphere-big:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -580,7 +639,7 @@ for epoch in range(0,1):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_small',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/test/results/hemi-sphere-small')
+            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_small',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/comparison/results/hemi-sphere-small')
     print('hemi-sphere-small:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -602,7 +661,5 @@ for epoch in range(0,1):
     print('percentage 1: ',acc_all_1/count)
     print('percentage 2: ',acc_all_2/count)
     print('percentage 3: ',acc_all_3/count)
-
     mean_list.append(mean_all/count)
     median_list.append(median_all/count)
-

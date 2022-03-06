@@ -5,7 +5,7 @@ import torch.nn.functional as F
 class SPADE(nn.Module):
     def __init__(self,input_channel):
         super(SPADE, self).__init__()
-        npolar = 2
+        npolar = 2+12
         nhidden = 128
         ks = 3
         pw = ks//2
@@ -29,7 +29,7 @@ class SPADE(nn.Module):
         x1 = self.relu(x1)
         alpha = self.polar_conv_alpha(x1)
         beta = self.polar_conv_beta(x1)
-        x = x + x*alpha + beta
+        x = x * (1 + alpha) + beta
 
         return x
 
