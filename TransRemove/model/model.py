@@ -13,19 +13,19 @@ from modeling.smqNet.decoder  import build_decoder
 from modeling.backbone import build_backbone
 from torchvision.utils import make_grid
 from tensorboardX import SummaryWriter
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as pt
 from modeling.deepSfp.SPADE import SPADE
 from modeling.attention.DANet import DAModule
 import numpy as np
 class FinalLayer(nn.Module):
-    def __init__(self,input_channel):
+    def __init__(self,input_channel,output_channel):
         super(FinalLayer, self).__init__()
         ks = 3
         pw = ks//2
         self.conv1 = nn.Conv2d(in_channels=input_channel,out_channels=input_channel,kernel_size=ks,padding=pw)
         self.instace_norm = nn.InstanceNorm2d(num_features=input_channel)
         self.leaky_relu = nn.LeakyReLU()
-        self.conv2 = nn.Conv2d(in_channels=input_channel,out_channels=3,kernel_size=1)
+        self.conv2 = nn.Conv2d(in_channels=input_channel,out_channels=output_channel,kernel_size=1)
 
     def forward(self, x):
         x1 = self.conv1(x)
@@ -114,13 +114,13 @@ class upSample(nn.Module):
         return x
 
 class decoder(nn.Module):
-    def __init__(self):
+    def __init__(self,out_channel):
         super(decoder, self).__init__()
         self.up4 = upSample(in_channels=256,out_channels=128,output_size=64)
         self.up3 = upSample(in_channels=128,out_channels=64,output_size=128)
         self.up2 = upSample(in_channels=64,out_channels=32,output_size=256)
         self.up1 = upSample(in_channels=32,out_channels=16,output_size=512)
-        self.finalLayer = FinalLayer(input_channel=16*2)
+        self.finalLayer = FinalLayer(input_channel=16*2,output_channel=out_channel)
 
     def forward(self,x,x_0,x_1,x_2,x_3,x_4):
         # x_0: (B,16,512,512)
@@ -140,10 +140,10 @@ class decoder(nn.Module):
 
 
 
-class smqFusion(nn.Module):
-    def __init__(self, backbone='resnet', output_stride=16, num_classes=21,
+class TransRemove(nn.Module):
+    def __init__(self, backbone='resnet50', output_stride=16, num_classes=21,
                  sync_bn=True, freeze_bn=False,device= None):
-        super(smqFusion, self).__init__()
+        super(TransRemove, self).__init__()
         if backbone == 'drn':
             output_stride = 8
 
@@ -151,33 +151,15 @@ class smqFusion(nn.Module):
             BatchNorm = SynchronizedBatchNorm2d
         else:
             BatchNorm = nn.BatchNorm2d
-        self.kernel_size = 9
-        self.lamda = 1
-        self.m = 0.5
-        self.mean_kernel = torch.ones([1,1,self.kernel_size,self.kernel_size])/self.kernel_size**2
-        self.mean_kernel = self.mean_kernel.to(device)
-        self.mean_kernel = nn.Parameter(data=self.mean_kernel, requires_grad=False)
-        self.sum_kernel_1 = torch.ones([1,1,self.kernel_size,self.kernel_size])
-        self.sum_kernel_1 = self.sum_kernel_1.to(device)
-        self.sum_kernel_1 = nn.Parameter(data=self.sum_kernel_1, requires_grad=False)
-
-        self.sum_kernel_3 = torch.ones([3,3,self.kernel_size,self.kernel_size])
-        self.sum_kernel_3 = self.sum_kernel_3.to(device)
-        self.sum_kernel_3 = nn.Parameter(data=self.sum_kernel_3, requires_grad=False)
 
 
 
         # branch
-        self.backbone_orig = build_backbone(in_channels=2 ,backbone=backbone, output_stride=output_stride, BatchNorm=BatchNorm,Fusion=True)
+        self.backbone_orig = build_backbone(in_channels=4 ,backbone=backbone, output_stride=output_stride, BatchNorm=BatchNorm,Fusion=True)
         self.aspp_orig = build_aspp(backbone, output_stride, BatchNorm)
-        self.backbone_prior = build_backbone(in_channels=12,backbone=backbone, output_stride=output_stride, BatchNorm=BatchNorm,Fusion=True)
-        self.aspp_prior = build_aspp(backbone,output_stride,BatchNorm)
-        # self.decoder_orig = build_decoder(num_classes, backbone, BatchNorm,double=False)
-        # self.decoder_prior =  build_decoder(num_classes, backbone, BatchNorm,double=False)
-        self.backbone_atten = build_backbone(in_channels=1 ,backbone=backbone,output_stride=output_stride,BatchNorm=BatchNorm,Fusion=True)
-        self.aspp_atten = build_aspp(backbone,output_stride,BatchNorm)
 
-        self.decoder = decoder()
+
+        self.decoder = decoder(out_channel=2)
 
         self.calibrator_0 = calibrator(in_channels=64,out_channels=16,output_size=512)
         self.calibrator_1 = calibrator(in_channels=64,out_channels=32,output_size=256)
@@ -197,73 +179,28 @@ class smqFusion(nn.Module):
 
         self.writer = SummaryWriter()
 
-    def forward(self, orig,prior):
-        img  = orig
-        img_split = torch.split(img, 1, 1)
-        aolp = img_split[1]
-
-        # get attention map
-        mean_map = nn.functional.conv2d(aolp,self.mean_kernel,padding=self.kernel_size//2)
-        abs_map =torch.abs(aolp - mean_map)
-        abs_map = torch.pow(abs_map,self.m)
-        atten_map = nn.functional.conv2d(abs_map,self.sum_kernel_1,padding=self.kernel_size//2)
-        shape = atten_map.shape
-        atten_map = torch.reshape(atten_map,[shape[0],-1])
-        max_values,indices = torch.max(atten_map,dim = 1)
-        max_values = torch.reshape(max_values,[shape[0],1])
-        atten_map = torch.div(atten_map,max_values)
-        atten_map = torch.reshape(atten_map,[shape[0],shape[1],shape[2],shape[3]])
-
-
-
-        # orig-polar branch
-        x_orig, x_orig_0,x_orig_1,x_orig_2,x_orig_3,x_orig_4 = self.backbone_orig(orig)
-        x_orig = self.aspp_orig(x_orig)
-
-        # prior branch
-        x_prior, x_prior_0,x_prior_1,x_prior_2,x_prior_3,x_prior_4 = self.backbone_prior(prior)
-        x_prior = self.aspp_prior(x_prior)
+    def forward(self, params):
 
 
 
 
-        # attention branch
-        x_atten,x_atten_0,x_atten_1,x_atten_2,x_atten_3,x_atten_4 = self.backbone_atten(atten_map)
-        x_atten = self.aspp_atten(x_atten)
-        x_atten = self.sigmoid(x_atten)
-        x_atten_0 = self.sigmoid(x_atten_0)
-        x_atten_1 = self.sigmoid(x_atten_1)
-        x_atten_2 = self.sigmoid(x_atten_2)
-        x_atten_3 = self.sigmoid(x_atten_3)
-        x_atten_4 = self.sigmoid(x_atten_4)
+        # encoder
+        x,x_0,x_1,x_2,x_3,x_4 = self.backbone_orig(params)
+        x = self.aspp_orig(x)
 
 
-
-        # fusion step
-        x_prior = x_prior + self.attention_layer(x_atten,x_atten,x_prior)
-
-
-        x_fusion =  x_orig + (x_atten)*x_prior
-        x_fusion_0 = x_orig_0 + (x_atten_0)*x_prior_0
-        x_fusion_1 = x_orig_1 + (x_atten_1)*x_prior_1
-        x_fusion_2 = x_orig_2 + (x_atten_2)*x_prior_2
-        x_fusion_3 = x_orig_3 + (x_atten_3)*x_prior_3
-        x_fusion_4 = x_orig_4 + (x_atten_4)*x_prior_4
-
-
-
-        x_fusion_0 = self.calibrator_0(x_fusion_0)
-        x_fusion_1 = self.calibrator_1(x_fusion_1)
-        x_fusion_2 = self.calibrator_2(x_fusion_2)
-        x_fusion_3 = self.calibrator_3(x_fusion_3)
-        x_fusion_4 = self.calibrator_4(x_fusion_4)
+        x_0 = self.calibrator_0(x_0)
+        x_1 = self.calibrator_1(x_1)
+        x_2 = self.calibrator_2(x_2)
+        x_3 = self.calibrator_3(x_3)
+        x_4 = self.calibrator_4(x_4)
 
         # decode
-        x = self.decoder(x_fusion,x_fusion_0,x_fusion_1,x_fusion_2,x_fusion_3,x_fusion_4)
+        x = self.decoder(x,x_0,x_1,x_2,x_3,x_4)
 
+        x = self.sigmoid(x)
 
-
-        return x,atten_map
+        return x
 
     def freeze_bn(self):
         for m in self.modules():
@@ -271,3 +208,7 @@ class smqFusion(nn.Module):
                 m.eval()
             elif isinstance(m, nn.BatchNorm2d):
                 m.eval()
+if __name__ == "__main__":
+    input = torch.ones(6,2,512,512)
+    model = TransRemove(num_classes=2)
+    print(model(input))

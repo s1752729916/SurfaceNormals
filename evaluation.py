@@ -57,6 +57,7 @@ def evaluation(model,testLoader,device,criterion,epoch,resultPath = None,name=No
         running_percentage_3 += percentage_3.item()
 
         # save validation pictures
+
         label_t_rgb = label_t.numpy().squeeze(0).transpose(1, 2, 0)
         label_t_rgb = API.utils.normal_to_rgb(label_t_rgb)
         predict_norm = normal_vectors_norm.numpy().squeeze(0).transpose(1, 2, 0)

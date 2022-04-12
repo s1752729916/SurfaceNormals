@@ -54,7 +54,7 @@ def loss_fn_cosine(input_vec, target_vec,mask_tensor, reduction='sum',device = N
     if(use_atten ==True):
         loss_cos = (1.0 - cos(input_vec, target_vec))*(1 + atten_map*lamda_2)
     else:
-        loss_cos = (1.0 - cos(input_vec, target_vec))
+        loss_cos = (1.0 - cos(input_vec, target_vec))*(1 + atten_map*lamda_2)
 
     # gredient item
     # if(use_atten ==True):

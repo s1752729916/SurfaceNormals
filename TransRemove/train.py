@@ -8,11 +8,10 @@ import torch.nn as nn
 from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader,SubsetRandomSampler
 from tqdm import tqdm
-from modeling import deeplab
-from dataloader import dataloaderIDA,dataloaderI,dataloaderIDAN,dataloaderDA,dataloladerN,dataloaderDAN
-from modeling.PS_FCN.PS_FCN import PS_FCN
-from modeling.smqFusion.smqFusion import smqFusion
+from TransRemove.dataloader.dataloader_imgs import SurfaceDataset
+from TransRemove.model.model import TransRemove
 import loss_functions
+from TransRemove.loss.loss import loss_fn_mae,metric_calculator_batch
 import API.utils
 import numpy as np
 import random
@@ -67,173 +66,199 @@ input_only = [
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
 ######## train dataset concat ########
-dataset_middle_round_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/DoLP',
-                                                                                  aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/AoLP',
-                                                                                  synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/synthesis-normals',
+dataset_middle_round_cup_black_background_12_28 = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28',
+    # dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/DoLP',
+    #                                                                              aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/AoLP',
+                                                                 dolp_label = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/standard-params/DoLP',
+                                                                 aolp_label = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/standard-params/AoLP',
                                                                                   mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/masks',
                                                                                   label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_middle_square_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/synthesis-normals',
+dataset_middle_square_cup_black_background_12_28 = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/standard-params/AoLP',
                                                                                    mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/masks',
                                                                                    label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_middle_white_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/synthesis-normals',
+dataset_middle_white_cup_black_background_12_28 = SurfaceDataset( root_dir= '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/standard-params/AoLP',
                                                                                   mask_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/masks',
                                                                                   label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_plastic_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/synthesis-normals',
+dataset_plastic_cup_black_background_12_28 = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/standard-params/AoLP',
                                                                              mask_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/masks',
                                                                              label_dir= '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_tiny_white_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/synthesis-normals',
-                                                                                mask_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
+dataset_tiny_white_cup_black_background_12_28 = SurfaceDataset( root_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/standard-params/AoLP',
+    mask_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
                                                                                 label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/normals-png', transform=augs_train)
 
-dataset_tiny_white_cup_edges_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/synthesis-normals',
+dataset_tiny_white_cup_edges_black_background_12_28 = SurfaceDataset(root_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/standard-params/AoLP',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/normals-png', transform=augs_train)
-dataset_bird_back_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/synthesis-normals',
+dataset_bird_back_1_20 = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/standard-params/AoLP',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/normals-png', transform=augs_train)
-dataset_bird_front_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/synthesis-normals',
+dataset_bird_front_1_20 = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/standard-params/AoLP',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/normals-png', transform=augs_train)
-dataset_cat_front_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/synthesis-normals',
+dataset_cat_front_1_20 = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/standard-params/AoLP',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/normals-png', transform=augs_train)
-dataset_cat_back_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/synthesis-normals',
+dataset_cat_back_1_20 = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/standard-params/AoLP',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/normals-png', transform=augs_train)
-dataset_hemi_sphere_big_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/synthesis-normals',
+dataset_hemi_sphere_big_1_20 = SurfaceDataset(root_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/standard-params/AoLP',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/normals-png', transform=augs_train)
-dataset_hemi_sphere_small_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/synthesis-normals',
+dataset_hemi_sphere_small_1_20 = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20',
+    # dolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/standard-params/AoLP',
                                                                                       mask_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/masks',
                                                                                       label_dir= '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/normals-png', transform=augs_train)
 
 # synthetic datasets
 
-dataset_synthetic_polar_bun_zipper_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/synthesis-normals',
+dataset_synthetic_polar_bun_zipper_back = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/standard-params/AoLP',
                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/masks',
                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_bun_zipper_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/synthesis-normals',
+dataset_synthetic_polar_bun_zipper_front = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/standard-params/AoLP',
                                                                            mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/masks',
                                                                            label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/normals-png',
                                                                            transform=augs_train)
-dataset_synthetic_polar_armadillo_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/synthesis-normals',
+dataset_synthetic_polar_armadillo_back = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/standard-params/AoLP',
                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/masks',
                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/normals-png',
                                                                          transform=augs_train)
-dataset_synthetic_polar_armadillo_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/synthesis-normals',
+dataset_synthetic_polar_armadillo_front = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/standard-params/AoLP',
                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/masks',
                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_dragon_vrip = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/synthesis-normals',
+dataset_synthetic_polar_dragon_vrip = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/standard-params/AoLP',
                                                                       mask_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/masks',
                                                                       label_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/normals-png',
                                                                       transform=augs_train)
-dataset_synthetic_polar_happy_vrip_back= dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/synthesis-normals',
+dataset_synthetic_polar_happy_vrip_back= SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/standard-params/AoLP',
                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/masks',
                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/normals-png',
                                                                          transform=augs_train)
-dataset_synthetic_polar_happy_vrip_front= dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/synthesis-normals',
+dataset_synthetic_polar_happy_vrip_front= SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/standard-params/AoLP',
                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/masks',
                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_middle_round_cup = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/synthesis-normals',
+dataset_synthetic_polar_middle_round_cup = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/standard-params/AoLP',
                                                                            mask_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/masks',
                                                                            label_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/normals-png',
                                                                            transform=augs_train)
-dataset_synthetic_polar_bear_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/synthesis-normals',
+dataset_synthetic_polar_bear_front = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/bear-front/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/bear-front/standard-params/AoLP',
                                                                      mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/masks',
                                                                      label_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/normals-png',
                                                                      transform=augs_train)
-dataset_synthetic_polar_cow_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/synthesis-normals',
+dataset_synthetic_polar_cow_front = SurfaceDataset(root_dir= '/media/disk2/smq_data/samples/synthetic-polar/cow-front',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/cow-front/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/cow-front/standard-params/AoLP',
                                                                     mask_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/masks',
                                                                     label_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/normals-png',
                                                                     transform=augs_train)
-dataset_synthetic_polar_cow_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/synthesis-normals',
+dataset_synthetic_polar_cow_back = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/cow-back/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/cow-back/standard-params/AoLP',
                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/masks',
                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/normals-png',
                                                                    transform=augs_train)
-dataset_synthetic_polar_pot_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/synthesis-normals',
+dataset_synthetic_polar_pot_back = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/pot-back/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/pot-back/standard-params/AoLP',
                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/masks',
                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/normals-png',
                                                                    transform=augs_train)
-dataset_synthetic_polar_pot_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/synthesis-normals',
+dataset_synthetic_polar_pot_front = SurfaceDataset(root_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front',
+    # dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/DoLP',
+    # aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/AoLP',
+    dolp_label='/media/disk2/smq_data/samples/synthetic-polar/pot-front/standard-params/DoLP',
+    aolp_label='/media/disk2/smq_data/samples/synthetic-polar/pot-front/standard-params/AoLP',
                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/masks',
                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/normals-png',
                                                                    transform=augs_train)
@@ -316,24 +341,16 @@ print("trainLoader size:",trainLoader.__len__()*trainLoader.batch_size)
 ###################### ModelBuilder #############################
 
 #-- 1、 config parameters
-# backbone_model = 'resnet50'
 backbone_model = 'resnet50'
 sync_bn = False  # this is for Multi-GPU synchronize batch normalization
-numClasses = 3
-use_atten = False
 
 #-- 2、create model
 
-# model = deeplab.DeepLab(num_classes=numClasses,
-#                         backbone=backbone_model,
-#                         sync_bn=sync_bn,
-#                         freeze_bn=False)
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = smqFusion(backbone = backbone_model,num_classes=3,device=device,sync_bn=False)
-#-- 3、Enable GPU for training
+model = TransRemove(backbone=backbone_model,num_classes=2,device=device)
 
 import os
 # device = torch.device("cpu")
@@ -345,7 +362,7 @@ model = model.to(device)
 
 
 #-- 1、 config parameters
-learningRate = 0.01
+learningRate = 1e-6
 weightDecay = 5e-4
 momentum = 0.9
 # lrSchedulerStep
@@ -385,13 +402,13 @@ else:
             lrScheduler))
 
 #-- 4、select koss fu
-criterion = loss_functions.my_loss_cosine
+criterion = loss_fn_mae
 writer = SummaryWriter()
 
 
 ###################### Train Model #############################
 #-- 1、config parameters
-MAX_EPOCH = 22
+MAX_EPOCH = 50
 saveModelInterval = 10
 CHECKPOINT_DIR = '/home/robotlab/smq/SurfaceNormals/CheckPoints'
 total_iter_num = 0
@@ -439,8 +456,8 @@ if(continue_train):
                            Starting from epoch num 0', 'red'))
 #-- 3、epoch cycle
 import time
-mean_list = []
-median_list = []
+mean_dolp_list = []
+mean_aolp_list = []
 for epoch in range(START_EPOCH,MAX_EPOCH):
     print('\n\nEpoch {}/{}'.format(epoch, MAX_EPOCH - 1))
     print('-' * 30)
@@ -451,68 +468,61 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     model.train()  # set model mode to train mode
 
     running_loss = 0.0
-    running_mean = 0
-    running_median = 0
+    running_mean_dolp = 0
+    running_mean_aolp = 0
     for iter_num,batch  in enumerate(tqdm(trainLoader)):
         total_iter_num+=1
-        params_t,normals_t, label_t,mask_t = batch
+        params_t,label_params_t, label_t,mask_t = batch
         params_t = params_t.to(device)
-        normals_t = normals_t.to(device)
+        label_params_t = label_params_t.to(device)
         label_t = label_t.to(device)
         # Forward + Backward Prop
         start = time.time()
         optimizer.zero_grad()
         torch.set_grad_enabled(True)
-        normal_vectors,atten_map = model(params_t,normals_t)
-        normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
-        normal_vectors_norm = normal_vectors_norm
-        loss = criterion(normal_vectors_norm, label_t.double(),mask_tensor=mask_t,atten_map = atten_map,reduction='elementwise_mean',device=device,use_atten = use_atten)
-        loss /= batch_size
+        output_params = model(params_t)
+        loss = criterion(output_params.double(), label_params_t.double(),mask_tensor=mask_t,reduction='sum',device=device)
+        loss /=batch_size
         loss.backward()
         optimizer.step()
-        # print('time consume:',time.time()-start)
-
+        running_loss+=loss.item()
         # calcute metrics
-        label_t = label_t.detach().cpu()
-        normal_vectors_norm = normal_vectors_norm.detach().cpu()
-
-        loss_deg_mean, loss_deg_median, percentage_1, percentage_2, percentage_3 = loss_functions.metric_calculator_batch(
-            normal_vectors_norm.detach().cpu(), label_t.double())
-        running_mean += loss_deg_mean.item()
-        running_median += loss_deg_median.item()
-        running_loss += loss.item()
-
+        mean_dolp,mean_aolp = metric_calculator_batch(output_params,label_params_t,mask_tensor=mask_t)
+        running_mean_dolp += mean_dolp
+        running_mean_aolp += mean_aolp
         #  output train set
         if(epoch % 10==0):
-            label_t_rgb = label_t.numpy()[0,:,:,:].transpose(1, 2, 0)
-            label_t_rgb = API.utils.normal_to_rgb(label_t_rgb)
-            predict_norm = normal_vectors_norm.numpy()[0,:,:,:].transpose(1, 2, 0)
+            label_params_rgb = label_t.detach().cpu().numpy()[0,:,:,:] # (C,H,W)
+            label_dolp_rgb = (label_params_rgb[0,:,:]*255).astype(np.uint8)
+            label_aolp_rgb = (label_params_rgb[1,:,:]*255).astype(np.uint8)
+            predict_params = output_params.detach().cpu().numpy()[0,:,:,:] # (C,H,W)
             mask_t = mask_t.squeeze(1)
-            predict_norm[mask_t[0,:,:] == 0, :] = -1
-            predict_norm_rgb = API.utils.normal_to_rgb(predict_norm)
-            atten_map = atten_map[0,:,:,:]
-            atten_map_rgb = atten_map.detach().cpu().numpy().transpose(1, 2, 0)
-
-            atten_map_rgb = atten_map_rgb * 255
-            atten_map_rgb = atten_map_rgb.astype(np.uint8)
-            API.utils.png_saver(
-                os.path.join('/home/robotlab/smq/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-label.png'),
-                label_t_rgb)
-            API.utils.png_saver(
-                os.path.join('/home/robotlab/smq/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-predict.png'),
-                predict_norm_rgb)
-            API.utils.png_saver(
-                os.path.join('/home/robotlab/smq/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-atten.png'),
-                atten_map_rgb)
+            predict_params[:,mask_t[0,:,:] == 0] = 0
+            predict_dolp_rgb = (predict_params[0,:,:]*255).astype(np.uint8)
+            predict_aolp_rgb = (predict_params[1,:,:]*255).astype(np.uint8)
 
 
-        # print('loss_deg_mean:',loss_deg_mean)
-        # print('loss_deg_median:',loss_deg_median)
+            # save files for debug
+            API.utils.png_saver(
+                os.path.join('/home/robotlab/smq/SurfaceNormals/TransRemove/results/train', str(iter_num).zfill(3) + '-dolp-label.png'),
+                label_dolp_rgb)
+            API.utils.png_saver(
+                os.path.join('/home/robotlab/smq/SurfaceNormals/TransRemove/results/train', str(iter_num).zfill(3) + '-aolp-label.png'),
+                label_aolp_rgb)
+            API.utils.png_saver(
+                os.path.join('/home/robotlab/smq/SurfaceNormals/TransRemove/results/train', str(iter_num).zfill(3) + '-dolp-predict.png'),
+                predict_dolp_rgb)
+            API.utils.png_saver(
+                os.path.join('/home/robotlab/smq/SurfaceNormals/TransRemove/results/train', str(iter_num).zfill(3) + '-aolp-predict.png'),
+                predict_aolp_rgb)
+
+
+
     num_samples = (len(trainLoader))
-    epoch_loss = running_loss/num_samples
-    print("train running loss:",epoch_loss)
-    print("train running mean:",running_mean/num_samples)
-    print("train running median:",running_median/num_samples)
+    epoch_loss = running_loss
+    print("train running loss:",epoch_loss/num_samples)
+    print("train running mean dolp:",running_mean_dolp/num_samples)
+    print("train running mean aolp:",running_mean_aolp/num_samples)
 
 
     # save the model check point every N epoch
@@ -531,161 +541,118 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
 
 
     ###################### Validation Cycle #############################
-    mean_all = 0
-    median_all = 0
-    acc_all_1 = 0
-    acc_all_2 = 0
-    acc_all_3 = 0
+    mean_dolp_all = 0
+    mean_aolp_all = 0
     count = 0
     print('\nValidation:')
     print('=' * 10)
-    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_tiny_white_cup_edges,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup_edges',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/tiny-white-cup-edges')
+    running_loss,running_mean_dolp,running_mean_aolp = evaluation(model = model,
+        testLoader= testLoader_tiny_white_cup_edges,device=device,criterion=criterion,epoch = epoch,name = 'tiny_white_cup_edges',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/TransRemove/results/tiny-white-cup-edges')
     print('tiny-white-cup-edges:\n')
     print('loss: ',running_loss)
-    print('mean: ',running_mean)
-    print('median: ',running_median)
-    print('percentage_1: ',running_percentage_1)
-    print('percentage_2: ',running_percentage_2)
-    print('percentage_3: ',running_percentage_3)
+    print('mean dolp: ',running_mean_dolp)
+    print('mean aolp: ',running_mean_aolp)
+
     print('=' * 10)
     print('\n')
-    mean_all +=running_mean
-    median_all += running_median
-    acc_all_1 +=running_percentage_1
-    acc_all_2 +=running_percentage_2
-    acc_all_3 +=running_percentage_3
+    mean_dolp_all +=running_mean_dolp
+    mean_aolp_all += running_mean_aolp
 
     count +=1
 
-    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_tiny_white_cup,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/tiny-white-cup')
+    running_loss,running_mean_dolp,running_mean_aolp = evaluation(model = model,
+            testLoader= testLoader_tiny_white_cup,device=device,criterion=criterion,epoch = epoch,name = 'tiny_white_cup',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/TransRemove/results/tiny-white-cup')
     print('tiny-white-cup:')
     print('loss: ',running_loss)
-    print('mean: ',running_mean)
-    print('median: ',running_median)
-    print('percentage_1: ',running_percentage_1)
-    print('percentage_2: ',running_percentage_2)
-    print('percentage_3: ',running_percentage_3)
+    print('mean dolp: ',running_mean_dolp)
+    print('mean aolp: ',running_mean_aolp)
+
     print('=' * 10)
     print('\n')
-    mean_all +=running_mean
-    median_all += running_median
-    acc_all_1 +=running_percentage_1
-    acc_all_2 +=running_percentage_2
-    acc_all_3 +=running_percentage_3
+    mean_dolp_all +=running_mean_dolp
+    mean_aolp_all += running_mean_aolp
     count += 1
 
-    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_bird_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/bird-front')
+    running_loss,running_mean_dolp,running_mean_aolp = evaluation(model = model,
+            testLoader= testLoader_bird_front,device=device,criterion=criterion,epoch = epoch,name = 'bird_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/TransRemove/results/bird-front')
     print('bird-front:')
     print('loss: ',running_loss)
-    print('mean: ',running_mean)
-    print('median: ',running_median)
-    print('percentage_1: ',running_percentage_1)
-    print('percentage_2: ',running_percentage_2)
-    print('percentage_3: ',running_percentage_3)
-    acc_all_1 +=running_percentage_1
-    acc_all_2 +=running_percentage_2
-    acc_all_3 +=running_percentage_3
+    print('mean dolp: ',running_mean_dolp)
+    print('mean aolp: ',running_mean_aolp)
+
     print('=' * 10)
     print('\n')
+    mean_dolp_all +=running_mean_dolp
+    mean_aolp_all += running_mean_aolp
 
-    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_bird_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/bird-back')
+
+    running_loss,running_mean_dolp,running_mean_aolp = evaluation(model = model,
+            testLoader= testLoader_bird_back,device=device,criterion=criterion,epoch = epoch,name = 'bird_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/TransRemove/results/bird-back')
     print('bird-back:')
     print('loss: ',running_loss)
-    print('mean: ',running_mean)
-    print('median: ',running_median)
-    print('percentage_1: ',running_percentage_1)
-    print('percentage_2: ',running_percentage_2)
-    print('percentage_3: ',running_percentage_3)
-    acc_all_1 +=running_percentage_1
-    acc_all_2 +=running_percentage_2
-    acc_all_3 +=running_percentage_3
+    print('mean dolp: ',running_mean_dolp)
+    print('mean aolp: ',running_mean_aolp)
+
     print('=' * 10)
     print('\n')
-    mean_all +=running_mean
-    median_all += running_median
+    mean_dolp_all +=running_mean_dolp
+    mean_aolp_all += running_mean_aolp
     count +=1
 
-    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_cat_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/cat-front')
+    running_loss,running_mean_dolp,running_mean_aolp = evaluation(model = model,
+            testLoader= testLoader_cat_front,device=device,criterion=criterion,epoch = epoch,name = 'cat_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/TransRemove/results/cat-front')
     print('cat-front:')
     print('loss: ',running_loss)
-    print('mean: ',running_mean)
-    print('median: ',running_median)
-    print('percentage_1: ',running_percentage_1)
-    print('percentage_2: ',running_percentage_2)
-    print('percentage_3: ',running_percentage_3)
-    acc_all_1 +=running_percentage_1
-    acc_all_2 +=running_percentage_2
-    acc_all_3 +=running_percentage_3
+    print('mean dolp: ',running_mean_dolp)
+    print('mean aolp: ',running_mean_aolp)
+
     print('=' * 10)
     print('\n')
-    mean_all +=running_mean
-    median_all += running_median
+    mean_dolp_all +=running_mean_dolp
+    mean_aolp_all += running_mean_aolp
     count +=1
 
-    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_cat_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/cat-back')
+    running_loss,running_mean_dolp,running_mean_aolp = evaluation(model = model,
+            testLoader= testLoader_cat_back,device=device,criterion=criterion,epoch = epoch,name = 'cat_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/TransRemove/results/cat-back')
     print('cat-back:')
     print('loss: ',running_loss)
-    print('mean: ',running_mean)
-    print('median: ',running_median)
-    print('percentage_1: ',running_percentage_1)
-    print('percentage_2: ',running_percentage_2)
-    print('percentage_3: ',running_percentage_3)
-    acc_all_1 +=running_percentage_1
-    acc_all_2 +=running_percentage_2
-    acc_all_3 +=running_percentage_3
+    print('mean dolp: ',running_mean_dolp)
+    print('mean aolp: ',running_mean_aolp)
+
     print('=' * 10)
     print('\n')
-    mean_all +=running_mean
-    median_all += running_median
+    mean_dolp_all +=running_mean_dolp
+    mean_aolp_all += running_mean_aolp
     count +=1
 
-    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_hemi_sphere_big,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_big',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/hemi-sphere-big')
+    running_loss,running_mean_dolp,running_mean_aolp = evaluation(model = model,
+            testLoader= testLoader_hemi_sphere_big,device=device,criterion=criterion,epoch = epoch,name = 'hemi_sphere_big',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/TransRemove/results/hemi-sphere-big')
     print('hemi-sphere-big:')
     print('loss: ',running_loss)
-    print('mean: ',running_mean)
-    print('median: ',running_median)
-    print('percentage_1: ',running_percentage_1)
-    print('percentage_2: ',running_percentage_2)
-    print('percentage_3: ',running_percentage_3)
-    acc_all_1 +=running_percentage_1
-    acc_all_2 +=running_percentage_2
-    acc_all_3 +=running_percentage_3
+    print('mean dolp: ',running_mean_dolp)
+    print('mean aolp: ',running_mean_aolp)
+
     print('=' * 10)
     print('\n')
-    mean_all +=running_mean
-    median_all += running_median
+    mean_dolp_all +=running_mean_dolp
+    mean_aolp_all += running_mean_aolp
     count +=1
 
-    running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_small',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/hemi-sphere-small')
+    running_loss,running_mean_dolp,running_mean_aolp = evaluation(model = model,
+            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,epoch = epoch,name = 'hemi_sphere_small',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/TransRemove/results/hemi-sphere-small')
     print('hemi-sphere-small:')
     print('loss: ',running_loss)
-    print('mean: ',running_mean)
-    print('median: ',running_median)
-    print('percentage_1: ',running_percentage_1)
-    print('percentage_2: ',running_percentage_2)
-    print('percentage_3: ',running_percentage_3)
-    acc_all_1 +=running_percentage_1
-    acc_all_2 +=running_percentage_2
-    acc_all_3 +=running_percentage_3
+    print('mean dolp: ',running_mean_dolp)
+    print('mean aolp: ',running_mean_aolp)
+
     print('=' * 10)
     print('\n')
-    mean_all +=running_mean
-    median_all += running_median
+    mean_dolp_all +=running_mean_dolp
+    mean_aolp_all += running_mean_aolp
     count +=1
 
-    print('all mean: ',mean_all/count)
-    print('all median: ',median_all/count)
-    print('percentage 1: ',acc_all_1/count)
-    print('percentage 2: ',acc_all_2/count)
-    print('percentage 3: ',acc_all_3/count)
-    mean_list.append(mean_all/count)
-    median_list.append(median_all/count)
+    print('all mean dolp: ',mean_dolp_all/count)
+    print('all mean aolp: ',mean_aolp_all/count)
+    mean_dolp_list.append(mean_dolp_all/count)
+    mean_aolp_list.append(mean_aolp_all/count)
 
