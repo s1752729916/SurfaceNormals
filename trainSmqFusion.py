@@ -67,175 +67,170 @@ input_only = [
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
 ######## train dataset concat ########
-dataset_middle_round_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(dolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/DoLP',
-                                                                                  aolp_dir = '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/params/AoLP',
-                                                                                  synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/synthesis-normals',
-                                                                                  mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/masks',
-                                                                                  label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Round-Cup-Black-Background-12-28/normals-png', transform=augs_train)
+dataset_middle_round_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(dolp_dir = '/media/zjw/smq/data/TransSfP/real-world/middle-round-cup/params/DoLP',
+                                                                                  aolp_dir = '/media/zjw/smq/data/TransSfP/real-world/middle-round-cup/params/AoLP',
+                                                                                  synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/middle-round-cup/synthesis-normals',
+                                                                                  mask_dir= '/media/zjw/smq/data/TransSfP/real-world/middle-round-cup/masks',
+                                                                                  label_dir= '/media/zjw/smq/data/TransSfP/real-world/middle-round-cup/normals-png', transform=augs_train)
 
 dataset_middle_square_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/synthesis-normals',
-                                                                                   mask_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/masks',
-                                                                                   label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-Square-Cup-Black-Background-12-28/normals-png', transform=augs_train)
+    dolp_dir='/media/zjw/smq/data/TransSfP/real-world/square-cup/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/real-world/square-cup/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/square-cup/synthesis-normals',
+                                                                                   mask_dir= '/media/zjw/smq/data/TransSfP/real-world/square-cup/masks',
+                                                                                   label_dir= '/media/zjw/smq/data/TransSfP/real-world/square-cup/normals-png', transform=augs_train)
 
 dataset_middle_white_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/synthesis-normals',
-                                                                                  mask_dir='/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/masks',
-                                                                                  label_dir= '/media/disk2/smq_data/samples/End2End2/Middle-White-Cup-Black-Background-12-28/normals-png', transform=augs_train)
+    dolp_dir='/media/zjw/smq/data/TransSfP/real-world/middle-white-cup/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/real-world/middle-white-cup/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/middle-white-cup/synthesis-normals',
+                                                                                  mask_dir='/media/zjw/smq/data/TransSfP/real-world/middle-white-cup/masks',
+                                                                                  label_dir= '/media/zjw/smq/data/TransSfP/real-world/middle-white-cup/normals-png', transform=augs_train)
 
-dataset_plastic_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/synthesis-normals',
-                                                                             mask_dir='/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/masks',
-                                                                             label_dir= '/media/disk2/smq_data/samples/End2End2/Plastic-Cup-Black-Background-12-28/normals-png', transform=augs_train)
+
 
 dataset_tiny_white_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/synthesis-normals',
-                                                                                mask_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/masks',
-                                                                                label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Black-Background-12-28/normals-png', transform=augs_train)
+    dolp_dir='/media/zjw/smq/data/TransSfP/real-world/tiny-cup/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/real-world/tiny-cup/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/tiny-cup/synthesis-normals',
+                                                                                mask_dir='/media/zjw/smq/data/TransSfP/real-world/tiny-cup/masks',
+                                                                                label_dir= '/media/zjw/smq/data/TransSfP/real-world/tiny-cup/normals-png', transform=augs_train)
 
 dataset_tiny_white_cup_edges_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/synthesis-normals',
-                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/masks',
-                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/Tiny-White-Cup-Edges-Black-Background-12-28/normals-png', transform=augs_train)
+    dolp_dir='/media/zjw/smq/data/TransSfP/real-world/tiny-cup-edges/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/real-world/tiny-cup-edges/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/tiny-cup-edges/synthesis-normals',
+                                                                                      mask_dir = '/media/zjw/smq/data/TransSfP/real-world/tiny-cup-edges/masks',
+                                                                                      label_dir= '/media/zjw/smq/data/TransSfP/real-world/tiny-cup-edges/normals-png', transform=augs_train)
 dataset_bird_back_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/bird-back-1-20/synthesis-normals',
-                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/masks',
-                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/bird-back-1-20/normals-png', transform=augs_train)
+    dolp_dir='/media/zjw/smq/data/TransSfP/real-world/bird-back/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/real-world/bird-back/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/bird-back/synthesis-normals',
+                                                                                      mask_dir = '/media/zjw/smq/data/TransSfP/real-world/bird-back/masks',
+                                                                                      label_dir= '/media/zjw/smq/data/TransSfP/real-world/bird-back/normals-png', transform=augs_train)
 dataset_bird_front_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/bird-front-1-20/synthesis-normals',
-                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/masks',
-                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/bird-front-1-20/normals-png', transform=augs_train)
+    dolp_dir='/media/zjw/smq/data/TransSfP/real-world/bird-front/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/real-world/bird-front/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/bird-front/synthesis-normals',
+                                                                                      mask_dir = '/media/zjw/smq/data/TransSfP/real-world/bird-front/masks',
+                                                                                      label_dir= '/media/zjw/smq/data/TransSfP/real-world/bird-front/normals-png', transform=augs_train)
 dataset_cat_front_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/cat-front-1-20/synthesis-normals',
-                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/masks',
-                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/cat-front-1-20/normals-png', transform=augs_train)
+    dolp_dir='/media/zjw/smq/data/TransSfP/real-world/cat-front/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/real-world/cat-front/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/cat-front/synthesis-normals',
+                                                                                      mask_dir = '/media/zjw/smq/data/TransSfP/real-world/cat-front/masks',
+                                                                                      label_dir= '/media/zjw/smq/data/TransSfP/real-world/cat-front/normals-png', transform=augs_train)
 dataset_cat_back_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/cat-back-1-20/synthesis-normals',
-                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/masks',
-                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/cat-back-1-20/normals-png', transform=augs_train)
+    dolp_dir='/media/zjw/smq/data/TransSfP/real-world/cat-back/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/real-world/cat-back/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/cat-back/synthesis-normals',
+                                                                                      mask_dir = '/media/zjw/smq/data/TransSfP/real-world/cat-back/masks',
+                                                                                      label_dir= '/media/zjw/smq/data/TransSfP/real-world/cat-back/normals-png', transform=augs_train)
 dataset_hemi_sphere_big_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/synthesis-normals',
-                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/masks',
-                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/hemi-sphere-big-1-20/normals-png', transform=augs_train)
+    dolp_dir='/media/zjw/smq/data/TransSfP/real-world/hemi-sphere-big/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/real-world/hemi-sphere-big/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/hemi-sphere-big/synthesis-normals',
+                                                                                      mask_dir = '/media/zjw/smq/data/TransSfP/real-world/hemi-sphere-big/masks',
+                                                                                      label_dir= '/media/zjw/smq/data/TransSfP/real-world/hemi-sphere-big/normals-png', transform=augs_train)
 dataset_hemi_sphere_small_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/synthesis-normals',
-                                                                                      mask_dir = '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/masks',
-                                                                                      label_dir= '/media/disk2/smq_data/samples/End2End2/hemi-sphere-small-1-20/normals-png', transform=augs_train)
+    dolp_dir='/media/zjw/smq/data/TransSfP/real-world/hemi-sphere-small/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/real-world/hemi-sphere-small/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/real-world/hemi-sphere-small/synthesis-normals',
+                                                                                      mask_dir = '/media/zjw/smq/data/TransSfP/real-world/hemi-sphere-small/masks',
+                                                                                      label_dir= '/media/zjw/smq/data/TransSfP/real-world/hemi-sphere-small/normals-png', transform=augs_train)
 
 # synthetic datasets
 
 dataset_synthetic_polar_bun_zipper_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/synthesis-normals',
-                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/masks',
-                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-back/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/bun-zipper-back/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/bun-zipper-back/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/bun-zipper-back/synthesis-normals',
+                                                                          mask_dir='/media/zjw/smq/data/TransSfP/synthetic/bun-zipper-back/masks',
+                                                                          label_dir='/media/zjw/smq/data/TransSfP/synthetic/bun-zipper-back/normals-png',
                                                                           transform=augs_train)
 dataset_synthetic_polar_bun_zipper_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/synthesis-normals',
-                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/masks',
-                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/bun-zipper-front/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/bun-zipper-front/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/bun-zipper-front/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/bun-zipper-front/synthesis-normals',
+                                                                           mask_dir='/media/zjw/smq/data/TransSfP/synthetic/bun-zipper-front/masks',
+                                                                           label_dir='/media/zjw/smq/data/TransSfP/synthetic/bun-zipper-front/normals-png',
                                                                            transform=augs_train)
 dataset_synthetic_polar_armadillo_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/synthesis-normals',
-                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/masks',
-                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-back/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/armadillo-back/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/armadillo-back/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/armadillo-back/synthesis-normals',
+                                                                         mask_dir='/media/zjw/smq/data/TransSfP/synthetic/armadillo-back/masks',
+                                                                         label_dir='/media/zjw/smq/data/TransSfP/synthetic/armadillo-back/normals-png',
                                                                          transform=augs_train)
 dataset_synthetic_polar_armadillo_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/synthesis-normals',
-                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/masks',
-                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/armadillo-front/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/armadillo-front/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/armadillo-front/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/armadillo-front/synthesis-normals',
+                                                                          mask_dir='/media/zjw/smq/data/TransSfP/synthetic/armadillo-front/masks',
+                                                                          label_dir='/media/zjw/smq/data/TransSfP/synthetic/armadillo-front/normals-png',
                                                                           transform=augs_train)
 dataset_synthetic_polar_dragon_vrip = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/synthesis-normals',
-                                                                      mask_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/masks',
-                                                                      label_dir='/media/disk2/smq_data/samples/synthetic-polar/dragon-vrip/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/dragon-vrip/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/dragon-vrip/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/dragon-vrip/synthesis-normals',
+                                                                      mask_dir='/media/zjw/smq/data/TransSfP/synthetic/dragon-vrip/masks',
+                                                                      label_dir='/media/zjw/smq/data/TransSfP/synthetic/dragon-vrip/normals-png',
                                                                       transform=augs_train)
 dataset_synthetic_polar_happy_vrip_back= dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/synthesis-normals',
-                                                                         mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/masks',
-                                                                         label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-back/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/happy-vrip-back/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/happy-vrip-back/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/happy-vrip-back/synthesis-normals',
+                                                                         mask_dir='/media/zjw/smq/data/TransSfP/synthetic/happy-vrip-back/masks',
+                                                                         label_dir='/media/zjw/smq/data/TransSfP/synthetic/happy-vrip-back/normals-png',
                                                                          transform=augs_train)
 dataset_synthetic_polar_happy_vrip_front= dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/synthesis-normals',
-                                                                          mask_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/masks',
-                                                                          label_dir='/media/disk2/smq_data/samples/synthetic-polar/happy-vrip-front/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/happy-vrip-front/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/happy-vrip-front/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/happy-vrip-front/synthesis-normals',
+                                                                          mask_dir='/media/zjw/smq/data/TransSfP/synthetic/happy-vrip-front/masks',
+                                                                          label_dir='/media/zjw/smq/data/TransSfP/synthetic/happy-vrip-front/normals-png',
                                                                           transform=augs_train)
 dataset_synthetic_polar_middle_round_cup = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/synthesis-normals',
-                                                                           mask_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/masks',
-                                                                           label_dir='/media/disk2/smq_data/samples/synthetic-polar/middle-round-cup/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/middle-round-cup/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/middle-round-cup/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/middle-round-cup/synthesis-normals',
+                                                                           mask_dir='/media/zjw/smq/data/TransSfP/synthetic/middle-round-cup/masks',
+                                                                           label_dir='/media/zjw/smq/data/TransSfP/synthetic/middle-round-cup/normals-png',
                                                                            transform=augs_train)
 dataset_synthetic_polar_bear_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/synthesis-normals',
-                                                                     mask_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/masks',
-                                                                     label_dir='/media/disk2/smq_data/samples/synthetic-polar/bear-front/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/bear-front/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/bear-front/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/bear-front/synthesis-normals',
+                                                                     mask_dir='/media/zjw/smq/data/TransSfP/synthetic/bear-front/masks',
+                                                                     label_dir='/media/zjw/smq/data/TransSfP/synthetic/bear-front/normals-png',
                                                                      transform=augs_train)
 dataset_synthetic_polar_cow_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/synthesis-normals',
-                                                                    mask_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/masks',
-                                                                    label_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-front/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/cow-front/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/cow-front/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/cow-front/synthesis-normals',
+                                                                    mask_dir='/media/zjw/smq/data/TransSfP/synthetic/cow-front/masks',
+                                                                    label_dir='/media/zjw/smq/data/TransSfP/synthetic/cow-front/normals-png',
                                                                     transform=augs_train)
 dataset_synthetic_polar_cow_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/synthesis-normals',
-                                                                   mask_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/masks',
-                                                                   label_dir='/media/disk2/smq_data/samples/synthetic-polar/cow-back/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/cow-back/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/cow-back/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/cow-back/synthesis-normals',
+                                                                   mask_dir='/media/zjw/smq/data/TransSfP/synthetic/cow-back/masks',
+                                                                   label_dir='/media/zjw/smq/data/TransSfP/synthetic/cow-back/normals-png',
                                                                    transform=augs_train)
 dataset_synthetic_polar_pot_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/synthesis-normals',
-                                                                   mask_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/masks',
-                                                                   label_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-back/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/pot-back/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/pot-back/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/pot-back/synthesis-normals',
+                                                                   mask_dir='/media/zjw/smq/data/TransSfP/synthetic/pot-back/masks',
+                                                                   label_dir='/media/zjw/smq/data/TransSfP/synthetic/pot-back/normals-png',
                                                                    transform=augs_train)
 dataset_synthetic_polar_pot_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/DoLP',
-    aolp_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/params/AoLP',
-    synthesis_normals_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/synthesis-normals',
-                                                                   mask_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/masks',
-                                                                   label_dir='/media/disk2/smq_data/samples/synthetic-polar/pot-front/normals-png',
+    dolp_dir='/media/zjw/smq/data/TransSfP/synthetic/pot-front/params/DoLP',
+    aolp_dir='/media/zjw/smq/data/TransSfP/synthetic/pot-front/params/AoLP',
+    synthesis_normals_dir='/media/zjw/smq/data/TransSfP/synthetic/pot-front/synthesis-normals',
+                                                                   mask_dir='/media/zjw/smq/data/TransSfP/synthetic/pot-front/masks',
+                                                                   label_dir='/media/zjw/smq/data/TransSfP/synthetic/pot-front/normals-png',
                                                                    transform=augs_train)
 
 
@@ -330,7 +325,7 @@ use_atten = False
 #                         freeze_bn=False)
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = smqFusion(backbone = backbone_model,num_classes=3,device=device,sync_bn=False)
 #-- 3、Enable GPU for training
@@ -496,13 +491,13 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
             atten_map_rgb = atten_map_rgb * 255
             atten_map_rgb = atten_map_rgb.astype(np.uint8)
             API.utils.png_saver(
-                os.path.join('/home/robotlab/smq/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-label.png'),
+                os.path.join('/home/zjw/smq/project/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-label.png'),
                 label_t_rgb)
             API.utils.png_saver(
-                os.path.join('/home/robotlab/smq/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-predict.png'),
+                os.path.join('/home/zjw/smq/project/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-predict.png'),
                 predict_norm_rgb)
             API.utils.png_saver(
-                os.path.join('/home/robotlab/smq/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-atten.png'),
+                os.path.join('/home/zjw/smq/project/SurfaceNormals/results/train', str(iter_num).zfill(3) + '-atten.png'),
                 atten_map_rgb)
 
 
