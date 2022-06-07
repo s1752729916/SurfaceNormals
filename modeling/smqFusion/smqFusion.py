@@ -201,10 +201,11 @@ class smqFusion(nn.Module):
         img  = orig
         img_split = torch.split(img, 1, 1)
         aolp = img_split[1]
+        aolp = (torch.cos(2*aolp) + 1.0)/2.0
 
         # get attention map
         mean_map = nn.functional.conv2d(aolp,self.mean_kernel,padding=self.kernel_size//2)
-        abs_map =torch.abs(aolp - mean_map)
+        abs_map = torch.abs(aolp - mean_map)
         abs_map = torch.pow(abs_map,self.m)
         atten_map = nn.functional.conv2d(abs_map,self.sum_kernel_1,padding=self.kernel_size//2)
         shape = atten_map.shape

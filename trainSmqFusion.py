@@ -37,7 +37,7 @@ setup_seed(20)
 
 imgHeight = 512
 imgWidth = 512
-batch_size = 6
+batch_size = 5
 num_workers = 2
 validation_split = 0.1
 shuffle_dataset = True
@@ -386,9 +386,9 @@ writer = SummaryWriter()
 
 ###################### Train Model #############################
 #-- 1、config parameters
-MAX_EPOCH = 22
-saveModelInterval = 10
-CHECKPOINT_DIR = '/home/robotlab/smq/SurfaceNormals/CheckPoints'
+MAX_EPOCH = 50
+saveModelInterval = 1
+CHECKPOINT_DIR = '/home/zjw/smq/project/SurfaceNormals/CheckPoints'
 total_iter_num = 0
 START_EPOCH = 0
 continue_train = False
@@ -535,7 +535,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print('\nValidation:')
     print('=' * 10)
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_tiny_white_cup_edges,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup_edges',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/tiny-white-cup-edges')
+            testLoader= testLoader_tiny_white_cup_edges,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup_edges',writer=writer,resultPath='/home/zjw/smq/project/SurfaceNormals/results/tiny-white-cup-edges')
     print('tiny-white-cup-edges:\n')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -554,7 +554,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_tiny_white_cup,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/tiny-white-cup')
+            testLoader= testLoader_tiny_white_cup,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'tiny_white_cup',writer=writer,resultPath='/home/zjw/smq/project/SurfaceNormals/results/tiny-white-cup')
     print('tiny-white-cup:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -572,7 +572,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     count += 1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_bird_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/bird-front')
+            testLoader= testLoader_bird_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_front',writer=writer,resultPath='/home/zjw/smq/project/SurfaceNormals/results/bird-front')
     print('bird-front:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -587,7 +587,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     print('\n')
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_bird_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/bird-back')
+            testLoader= testLoader_bird_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'bird_back',writer=writer,resultPath='/home/zjw/smq/project/SurfaceNormals/results/bird-back')
     print('bird-back:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -605,7 +605,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_cat_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_front',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/cat-front')
+            testLoader= testLoader_cat_front,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_front',writer=writer,resultPath='/home/zjw/smq/project/SurfaceNormals/results/cat-front')
     print('cat-front:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -623,7 +623,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_cat_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_back',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/cat-back')
+            testLoader= testLoader_cat_back,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'cat_back',writer=writer,resultPath='/home/zjw/smq/project/SurfaceNormals/results/cat-back')
     print('cat-back:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -641,7 +641,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_hemi_sphere_big,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_big',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/hemi-sphere-big')
+            testLoader= testLoader_hemi_sphere_big,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_big',writer=writer,resultPath='/home/zjw/smq/project/SurfaceNormals/results/hemi-sphere-big')
     print('hemi-sphere-big:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
@@ -659,7 +659,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_small',writer=writer,resultPath='/home/robotlab/smq/SurfaceNormals/results/hemi-sphere-small')
+            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_small',writer=writer,resultPath='/home/zjw/smq/project/SurfaceNormals/results/hemi-sphere-small')
     print('hemi-sphere-small:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)
