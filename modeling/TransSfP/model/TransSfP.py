@@ -92,10 +92,9 @@ class decoder(nn.Module):
 
 
 
-class smqFusion(nn.Module):
+class TranSfPNet(nn.Module):
     def __init__(self, backbone='resnet', output_stride=16, freeze_bn=False,device= None):
-        super(smqFusion, self).__init__()
-
+        super(TranSfPNet, self).__init__()
         BatchNorm = nn.BatchNorm2d
         self.kernel_size = 9
         self.m = 0.5

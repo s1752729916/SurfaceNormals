@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import torch.nn.functional as F
 from losses.TVLoss import TVLoss
 from losses.GradientLoss import Gradient_Net
-def my_loss_cosine(input_vec,target_vec,atten_map,mask_tensor = None,reduction = 'sum',smooth_item = False,device = None,use_atten = False):
+def my_loss_cosine(input_vec,target_vec,atten_map,aolp,mask_tensor = None,reduction = 'sum',smooth_item = False,device = None,use_atten = False):
     # 输入进来的input_vec是天顶角和方位角2个通道的数据，需要转换成正常的余弦损失函数计算所需要的法向量的形式
     # input_vec -- (batchSize,2,height,width):(sin_theta,cos_theta,sin_phi,cos_phi)
     # new_input = torch.zeros(size=(input_vec.size()[0],3,input_vec.size()[2],input_vec.size()[3])).to(device)
@@ -18,9 +18,37 @@ def my_loss_cosine(input_vec,target_vec,atten_map,mask_tensor = None,reduction =
     # new_input[:,1,:,:] = torch.sin(input_vec[:,1,:,:])*torch.sin(input_vec[:,0,:,:])
     # new_input[:,2,:,:] = torch.cos(input_vec[:,0,:,:])
     new_input = input_vec
+    cosine_loss = loss_fn_cosine(new_input,target_vec,atten_map = atten_map,mask_tensor=mask_tensor,reduction=reduction,device=device,use_atten = use_atten)
+    aolp_loss = loss_aolp(new_input,aolp,mask_tensor)
+    # print('cosine_loss:',cosine_loss)
+    # print('aolp_loss:',aolp_loss)
+    loss = cosine_loss + aolp_loss
+    return loss
 
+def loss_aolp(input_vec,aolp,mask_tensor):
+    aolp = aolp.squeeze(1) * torch.pi
+    aolp_0 = aolp + torch.pi / 2
+    aolp_1 = aolp - torch.pi / 2
+    aolp_0 = torch.remainder(aolp_0,torch.pi * 2)
+    aolp_1 = torch.remainder(aolp_1,torch.pi * 2)
 
-    return loss_fn_cosine(new_input,target_vec,atten_map = atten_map,mask_tensor=mask_tensor,reduction=reduction,device=device,use_atten = use_atten)
+    mask_invalid_pixels = torch.all(mask_tensor < 255, dim=1)
+    y = input_vec[:,1,:,:]
+    x = input_vec[:,0,:,:]
+    phi = torch.atan2(y,x) # (batchSize,H,W) (-pi,pi)
+    phi = torch.remainder(phi,torch.pi * 2)
+    # aolp[mask_invalid_pixels] = 0.0  #这句有错
+    error_0 = torch.min(torch.abs(phi - aolp_0),
+                              torch.pi * 2 - torch.abs(phi - aolp_0)) # (bs,H,W)
+    error_1 = torch.min(torch.abs(phi - aolp_1),
+                              torch.pi * 2 - torch.abs(phi - aolp_1))
+    error = torch.min(error_0,error_1)
+
+    error[mask_invalid_pixels] = 0.0
+    loss = torch.sum(error)
+    total_valid_pixels = (~mask_invalid_pixels).sum()
+    loss = loss / total_valid_pixels
+    return loss
 
 
 def loss_fn_cosine(input_vec, target_vec,mask_tensor, reduction='sum',device = None,atten_map = None,use_atten = False):

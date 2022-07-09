@@ -20,7 +20,7 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # from API.utils import exr_loader
-class DANSurfaceDataset(Dataset):
+class TransSfPDataset(Dataset):
     """
     Dataset class for testing model on estimation of surface normals.
     Uses imgaug for image augmentations.

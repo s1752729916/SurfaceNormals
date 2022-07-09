@@ -1,14 +1,10 @@
 # -*-coding:utf-8-*-
 
 import os
-from termcolor import colored
 import torch
 import torch.nn as nn
-from imgaug import augmenters as iaa
-from torch.utils.data import DataLoader,SubsetRandomSampler
 from tqdm import tqdm
-from modeling import deeplab
-from dataloader import dataloaderIDA,dataloaderI,dataloaderIDAN
+from dataloader import TransSfPDataset
 import loss_functions
 import API.utils
 import numpy as np
