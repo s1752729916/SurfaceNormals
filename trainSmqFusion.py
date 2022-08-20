@@ -327,7 +327,7 @@ use_atten = False
 #                         freeze_bn=False)
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = smqFusion(backbone = backbone_model,num_classes=3,device=device,sync_bn=False)
 #-- 3、Enable GPU for training
@@ -342,12 +342,12 @@ model = model.to(device)
 
 
 #-- 1、 config parameters
-learningRate = 0.01
+learningRate = 1e-6
 weightDecay = 5e-4
 momentum = 0.9
 # lrSchedulerStep
 lrScheduler = 'StepLR'
-step_size = 10
+step_size = 7
 gamma = 0.1
 # lrSchedulerPlateau:
 factor: 0.8
@@ -388,8 +388,8 @@ writer = SummaryWriter()
 
 ###################### Train Model #############################
 #-- 1、config parameters
-MAX_EPOCH = 500
-saveModelInterval = 50
+MAX_EPOCH = 20
+saveModelInterval = 10
 CHECKPOINT_DIR = code_root_dir + '/CheckPoints'
 total_iter_num = 0
 START_EPOCH = 0
@@ -465,7 +465,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
             normal_vectors,atten_map = model(params_t,normals_t)
             normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
             normal_vectors_norm = normal_vectors_norm
-            loss = criterion(normal_vectors_norm, label_t.double(),mask_tensor=mask_t,atten_map = atten_map,aolp = aolp,reduction='elementwise_mean',device=device,use_atten = use_atten)
+            loss = criterion(normal_vectors_norm, label_t.double(),mask_tensor=mask_t,atten_map = atten_map,aolp = aolp,reduction='sum',device=device,use_atten = use_atten)
         loss /= batch_size
         loss.backward()
         optimizer.step()
@@ -663,98 +663,7 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     count +=1
 
     running_loss,running_mean,running_median,running_percentage_1,running_percentage_2,running_percentage_3 = evaluation(model = model,
-            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_small',writer=writer,resultPath= code_root_dir + ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              ''
-                                                                                                                                                                                              '/results/hemi-sphere-small')
+            testLoader= testLoader_hemi_sphere_small,device=device,criterion=criterion,use_atten=use_atten,epoch = epoch,name = 'hemi_sphere_small',writer=writer,resultPath= code_root_dir + '/results/hemi-sphere-small')
     print('hemi-sphere-small:')
     print('loss: ',running_loss)
     print('mean: ',running_mean)

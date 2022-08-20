@@ -241,7 +241,7 @@ class smqFusion(nn.Module):
 
 
         # fusion step
-        x_prior = x_prior + self.attention_layer(x_atten,x_atten,x_prior)
+        # x_prior = x_prior + self.attention_layer(x_atten,x_atten,x_prior)
 
 
         x_fusion =  x_orig + (x_atten)*x_prior

@@ -47,7 +47,7 @@ def evaluation(model, testLoader, device, criterion, epoch, resultPath=None, nam
         normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
         normal_vectors_norm = normal_vectors_norm
         # loss = criterion(normal_vectors_norm, label_t.double(),reduction='sum',device=device)
-        loss = criterion(normal_vectors_norm, label_t.double(), mask_tensor=mask_t, atten_map=atten_map,
+        loss = criterion(normal_vectors_norm, label_t.double(), mask_tensor=mask_t, atten_map=atten_map,aolp=None,
                          reduction='sum', device=device, use_atten=use_atten)
 
         # calcute metrics
@@ -128,11 +128,12 @@ input_only = [
     "simplex-blend", "add", "mul", "hue", "sat", "norm", "gray", "motion-blur", "gaus-blur", "add-element",
     "mul-element", "guas-noise", "lap-noise", "dropout", "cdropout"
 ]
-dataset = dataloaderDAN.DANSurfaceDataset(dolp_dir = '/media/disk2/smq_data/samples/TransMVS/synthetic/bear-2/params/DoLP',
-                                                                                  aolp_dir = '/media/disk2/smq_data/samples/TransMVS/synthetic/bear-2/params/AoLP',
-                                                                                  synthesis_normals_dir='/media/disk2/smq_data/samples/TransMVS/synthetic/bear-2/synthesis-normals',
-                                                                                  mask_dir= '/media/disk2/smq_data/samples/TransMVS/synthetic/bear-2/masks',
-                                                                                  label_dir= '/media/disk2/smq_data/samples/TransMVS/synthetic/bear-2/normals-png', transform=augs_train)
+root_dir = '/media/disk2/smq_data/samples/PolarMVS/7-24/cat-big'
+dataset = dataloaderDAN.DANSurfaceDataset(dolp_dir = os.path.join(os.path.join(root_dir,'params'),'DoLP'),
+                                                                                  aolp_dir = os.path.join(os.path.join(root_dir,'params'),'AoLP'),
+                                                                                  synthesis_normals_dir=os.path.join(root_dir,'synthesis-normals'),
+                                                                                  mask_dir= os.path.join(root_dir,'masks'),
+                                                                                  label_dir= os.path.join(root_dir,'normals-png'), transform=augs_train)
 testLoader = DataLoader(dataset,
                          batch_size=1,
                          num_workers=num_workers,

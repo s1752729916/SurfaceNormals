@@ -19,11 +19,11 @@ def my_loss_cosine(input_vec,target_vec,atten_map,aolp,mask_tensor = None,reduct
     # new_input[:,2,:,:] = torch.cos(input_vec[:,0,:,:])
     new_input = input_vec
     cosine_loss = loss_fn_cosine(new_input,target_vec,atten_map = atten_map,mask_tensor=mask_tensor,reduction=reduction,device=device,use_atten = use_atten)
-    aolp_loss = loss_aolp(new_input,aolp,mask_tensor)
+    # aolp_loss = loss_aolp(new_input,aolp,mask_tensor)
     # print('cosine_loss:',cosine_loss)
     # print('aolp_loss:',aolp_loss)
-    loss = cosine_loss + aolp_loss
-    return loss
+    # loss = cosine_loss + aolp_loss
+    return cosine_loss
 
 def loss_aolp(input_vec,aolp,mask_tensor):
     aolp = aolp.squeeze(1) * torch.pi
@@ -77,13 +77,13 @@ def loss_fn_cosine(input_vec, target_vec,mask_tensor, reduction='sum',device = N
     cos = nn.CosineSimilarity(dim=1, eps=1e-6)
     lamda_1 = 0
     lamda_2 = 3
-    lamda_3 = 5
+    lamda_3 = 0
     tvLoss = TVLoss()
     if(use_atten ==True):
         loss_cos = (1.0 - cos(input_vec, target_vec))*(1 + atten_map*lamda_2)
     else:
         loss_cos = (1.0 - cos(input_vec, target_vec))*(1 + atten_map*lamda_2)
-
+    loss_cos = (1.0-cos(input_vec,target_vec))
     # gredient item
     # if(use_atten ==True):
         # gradient_model = Gradient_Net(device).to(device)
