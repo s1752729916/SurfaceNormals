@@ -168,7 +168,7 @@ class smqFusion(nn.Module):
 
 
         # branch
-        self.backbone_orig = build_backbone(in_channels=2 ,backbone=backbone, output_stride=output_stride, BatchNorm=BatchNorm,Fusion=True)
+        self.backbone_orig = build_backbone(in_channels=15 ,backbone=backbone, output_stride=output_stride, BatchNorm=BatchNorm,Fusion=True)
         self.aspp_orig = build_aspp(backbone, output_stride, BatchNorm)
         self.backbone_prior = build_backbone(in_channels=12,backbone=backbone, output_stride=output_stride, BatchNorm=BatchNorm,Fusion=True)
         self.aspp_prior = build_aspp(backbone,output_stride,BatchNorm)
@@ -201,7 +201,6 @@ class smqFusion(nn.Module):
         img  = orig
         img_split = torch.split(img, 1, 1)
         aolp = img_split[1]
-        # aolp = (torch.cos(2*aolp) + 1.0)/2.0
 
         # get attention map
         mean_map = nn.functional.conv2d(aolp,self.mean_kernel,padding=self.kernel_size//2)
@@ -216,51 +215,66 @@ class smqFusion(nn.Module):
         atten_map = torch.reshape(atten_map,[shape[0],shape[1],shape[2],shape[3]])
 
 
+        x = torch.cat((orig,prior,atten_map),dim=1)
 
-        # orig-polar branch
-        x_orig, x_orig_0,x_orig_1,x_orig_2,x_orig_3,x_orig_4 = self.backbone_orig(orig)
-        x_orig = self.aspp_orig(x_orig)
+        x_all,x_all_0,x_all_1,x_all_2,x_all_3,x_all_4 = self.backbone_orig(x)
+        x_all = self.aspp_orig(x_all)
 
-        # prior branch
-        x_prior, x_prior_0,x_prior_1,x_prior_2,x_prior_3,x_prior_4 = self.backbone_prior(prior)
-        x_prior = self.aspp_prior(x_prior)
+        x_fusion = x_all
+        x_fusion_0 = self.calibrator_0(x_all_0)
+        x_fusion_1 = self.calibrator_1(x_all_1)
+        x_fusion_2 = self.calibrator_2(x_all_2)
+        x_fusion_3 = self.calibrator_3(x_all_3)
+        x_fusion_4 = self.calibrator_4(x_all_4)
 
-
-
-
-        # attention branch
-        x_atten,x_atten_0,x_atten_1,x_atten_2,x_atten_3,x_atten_4 = self.backbone_atten(atten_map)
-        x_atten = self.aspp_atten(x_atten)
-        x_atten = self.sigmoid(x_atten)
-        x_atten_0 = self.sigmoid(x_atten_0)
-        x_atten_1 = self.sigmoid(x_atten_1)
-        x_atten_2 = self.sigmoid(x_atten_2)
-        x_atten_3 = self.sigmoid(x_atten_3)
-        x_atten_4 = self.sigmoid(x_atten_4)
-
-
-
-        # fusion step
-        # x_prior = x_prior + self.attention_layer(x_atten,x_atten,x_prior)
-
-
-        x_fusion =  x_orig + (x_atten)*x_prior
-        x_fusion_0 = x_orig_0 + (x_atten_0)*x_prior_0
-        x_fusion_1 = x_orig_1 + (x_atten_1)*x_prior_1
-        x_fusion_2 = x_orig_2 + (x_atten_2)*x_prior_2
-        x_fusion_3 = x_orig_3 + (x_atten_3)*x_prior_3
-        x_fusion_4 = x_orig_4 + (x_atten_4)*x_prior_4
-
-
-
-        x_fusion_0 = self.calibrator_0(x_fusion_0)
-        x_fusion_1 = self.calibrator_1(x_fusion_1)
-        x_fusion_2 = self.calibrator_2(x_fusion_2)
-        x_fusion_3 = self.calibrator_3(x_fusion_3)
-        x_fusion_4 = self.calibrator_4(x_fusion_4)
-
-        # decode
         x = self.decoder(x_fusion,x_fusion_0,x_fusion_1,x_fusion_2,x_fusion_3,x_fusion_4)
+
+
+
+        # # orig-polar branch
+        # x_orig, x_orig_0,x_orig_1,x_orig_2,x_orig_3,x_orig_4 = self.backbone_orig(orig)
+        # x_orig = self.aspp_orig(x_orig)
+        #
+        # # prior branch
+        # x_prior, x_prior_0,x_prior_1,x_prior_2,x_prior_3,x_prior_4 = self.backbone_prior(prior)
+        # x_prior = self.aspp_prior(x_prior)
+        #
+        #
+        #
+        #
+        # # attention branch
+        # x_atten,x_atten_0,x_atten_1,x_atten_2,x_atten_3,x_atten_4 = self.backbone_atten(atten_map)
+        # x_atten = self.aspp_atten(x_atten)
+        # x_atten = self.sigmoid(x_atten)
+        # x_atten_0 = self.sigmoid(x_atten_0)
+        # x_atten_1 = self.sigmoid(x_atten_1)
+        # x_atten_2 = self.sigmoid(x_atten_2)
+        # x_atten_3 = self.sigmoid(x_atten_3)
+        # x_atten_4 = self.sigmoid(x_atten_4)
+        #
+        #
+        #
+        # # fusion step
+        # # x_prior = x_prior + self.attention_layer(x_atten,x_atten,x_prior)
+        #
+        #
+        # x_fusion =  x_orig + (x_atten)*x_prior
+        # x_fusion_0 = x_orig_0 + (x_atten_0)*x_prior_0
+        # x_fusion_1 = x_orig_1 + (x_atten_1)*x_prior_1
+        # x_fusion_2 = x_orig_2 + (x_atten_2)*x_prior_2
+        # x_fusion_3 = x_orig_3 + (x_atten_3)*x_prior_3
+        # x_fusion_4 = x_orig_4 + (x_atten_4)*x_prior_4
+        #
+        #
+        #
+        # x_fusion_0 = self.calibrator_0(x_fusion_0)
+        # x_fusion_1 = self.calibrator_1(x_fusion_1)
+        # x_fusion_2 = self.calibrator_2(x_fusion_2)
+        # x_fusion_3 = self.calibrator_3(x_fusion_3)
+        # x_fusion_4 = self.calibrator_4(x_fusion_4)
+        #
+        # # decode
+        # x = self.decoder(x_fusion,x_fusion_0,x_fusion_1,x_fusion_2,x_fusion_3,x_fusion_4)
 
 
 
