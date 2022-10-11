@@ -69,168 +69,119 @@ input_only = [
 ######## train dataset concat ########
 root_dir = '/media/disk2/smq_data/samples/TransSfP'
 code_root_dir = '/home/robotlab/smq/SurfaceNormals'
-dataset_middle_round_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(dolp_dir = root_dir + '/real-world/middle-round-cup/params/DoLP',
-                                                                                  aolp_dir = root_dir + '/real-world/middle-round-cup/params/AoLP',
-                                                                                  synthesis_normals_dir= root_dir + '/real-world/middle-round-cup/synthesis-normals',
+dataset_middle_round_cup_black_background_12_28 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/middle-round-cup/I-sum',
                                                                                   mask_dir= root_dir + '/real-world/middle-round-cup/masks',
                                                                                   label_dir= root_dir + '/real-world/middle-round-cup/normals-png', transform=augs_train)
 
-dataset_middle_square_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/real-world/middle-square-cup/params/DoLP',
-    aolp_dir= root_dir + '/real-world/middle-square-cup/params/AoLP',
-    synthesis_normals_dir= root_dir + '/real-world/middle-square-cup/synthesis-normals',
+dataset_middle_square_cup_black_background_12_28 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/middle-square-cup/I-sum',
                                                                                    mask_dir= root_dir + '/real-world/middle-square-cup/masks',
                                                                                    label_dir= root_dir + '/real-world/middle-square-cup/normals-png', transform=augs_train)
 
-dataset_middle_white_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/real-world/middle-white-cup/params/DoLP',
-    aolp_dir= root_dir + '/real-world/middle-white-cup/params/AoLP',
-    synthesis_normals_dir= root_dir + '/real-world/middle-white-cup/synthesis-normals',
+dataset_middle_white_cup_black_background_12_28 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/middle-white-cup/I-sum',
+
                                                                                   mask_dir= root_dir + '/real-world/middle-white-cup/masks',
                                                                                   label_dir= root_dir + '/real-world/middle-white-cup/normals-png', transform=augs_train)
 
 
 
-dataset_tiny_white_cup_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/real-world/tiny-cup/params/DoLP',
-    aolp_dir= root_dir + '/real-world/tiny-cup/params/AoLP',
-    synthesis_normals_dir= root_dir + '/real-world/tiny-cup/synthesis-normals',
+dataset_tiny_white_cup_black_background_12_28 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/tiny-cup/I-sum',
+
                                                                                 mask_dir= root_dir + '/real-world/tiny-cup/masks',
                                                                                 label_dir= root_dir + '/real-world/tiny-cup/normals-png', transform=augs_train)
 
-dataset_tiny_white_cup_edges_black_background_12_28 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/real-world/tiny-cup-edges/params/DoLP',
-    aolp_dir= root_dir + '/real-world/tiny-cup-edges/params/AoLP',
-    synthesis_normals_dir=  root_dir + '/real-world/tiny-cup-edges/synthesis-normals',
+dataset_tiny_white_cup_edges_black_background_12_28 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/tiny-cup-edges/I-sum',
+
                                                                                       mask_dir = root_dir + '/real-world/tiny-cup-edges/masks',
                                                                                       label_dir= root_dir + '/real-world/tiny-cup-edges/normals-png', transform=augs_train)
-dataset_bird_back_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/real-world/bird-back/params/DoLP',
-    aolp_dir= root_dir + '/real-world/bird-back/params/AoLP',
-    synthesis_normals_dir= root_dir + '/real-world/bird-back/synthesis-normals',
+dataset_bird_back_1_20 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/bird-back/I-sum',
+
                                                                                       mask_dir = root_dir + '/real-world/bird-back/masks',
                                                                                       label_dir= root_dir + '/real-world/bird-back/normals-png', transform=augs_train)
-dataset_bird_front_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/real-world/bird-front/params/DoLP',
-    aolp_dir= root_dir + '/real-world/bird-front/params/AoLP',
-    synthesis_normals_dir= root_dir + '/real-world/bird-front/synthesis-normals',
+dataset_bird_front_1_20 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/bird-front/I-sum',
+
                                                                                       mask_dir = root_dir + '/real-world/bird-front/masks',
                                                                                       label_dir= root_dir + '/real-world/bird-front/normals-png', transform=augs_train)
-dataset_cat_front_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/real-world/cat-front/params/DoLP',
-    aolp_dir= root_dir + '/real-world/cat-front/params/AoLP',
-    synthesis_normals_dir= root_dir + '/real-world/cat-front/synthesis-normals',
+dataset_cat_front_1_20 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/cat-front/I-sum',
+
                                                                                       mask_dir = root_dir + '/real-world/cat-front/masks',
                                                                                       label_dir= root_dir + '/real-world/cat-front/normals-png', transform=augs_train)
-dataset_cat_back_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/real-world/cat-back/params/DoLP',
-    aolp_dir= root_dir + '/real-world/cat-back/params/AoLP',
-    synthesis_normals_dir= root_dir + '/real-world/cat-back/synthesis-normals',
+dataset_cat_back_1_20 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/cat-back/I-sum',
+
                                                                                       mask_dir = root_dir + '/real-world/cat-back/masks',
                                                                                       label_dir= root_dir + '/real-world/cat-back/normals-png', transform=augs_train)
-dataset_hemi_sphere_big_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/real-world/hemi-sphere-big/params/DoLP',
-    aolp_dir= root_dir + '/real-world/hemi-sphere-big/params/AoLP',
-    synthesis_normals_dir= root_dir + '/real-world/hemi-sphere-big/synthesis-normals',
+dataset_hemi_sphere_big_1_20 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/hemi-sphere-big/I-sum',
+
                                                                                       mask_dir = root_dir + '/real-world/hemi-sphere-big/masks',
                                                                                       label_dir= root_dir + '/real-world/hemi-sphere-big/normals-png', transform=augs_train)
-dataset_hemi_sphere_small_1_20 = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/real-world/hemi-sphere-small/params/DoLP',
-    aolp_dir= root_dir + '/real-world/hemi-sphere-small/params/AoLP',
-    synthesis_normals_dir= root_dir + '/real-world/hemi-sphere-small/synthesis-normals',
+dataset_hemi_sphere_small_1_20 = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/real-world/hemi-sphere-small/I-sum',
+
                                                                                       mask_dir = root_dir + '/real-world/hemi-sphere-small/masks',
                                                                                       label_dir= root_dir + '/real-world/hemi-sphere-small/normals-png', transform=augs_train)
 
 # synthetic datasets
 
-dataset_synthetic_polar_bun_zipper_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/bun-zipper-back/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/bun-zipper-back/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/bun-zipper-back/synthesis-normals',
+dataset_synthetic_polar_bun_zipper_back = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/bun-zipper-back/I-sum',
+
                                                                           mask_dir= root_dir + '/synthetic/bun-zipper-back/masks',
                                                                           label_dir= root_dir + '/synthetic/bun-zipper-back/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_bun_zipper_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/bun-zipper-front/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/bun-zipper-front/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/bun-zipper-front/synthesis-normals',
+dataset_synthetic_polar_bun_zipper_front = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/bun-zipper-front/I-sum',
+
                                                                            mask_dir= root_dir + '/synthetic/bun-zipper-front/masks',
                                                                            label_dir= root_dir + '/synthetic/bun-zipper-front/normals-png',
                                                                            transform=augs_train)
-dataset_synthetic_polar_armadillo_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/armadillo-back/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/armadillo-back/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/armadillo-back/synthesis-normals',
+dataset_synthetic_polar_armadillo_back = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/armadillo-back/I-sum',
+
                                                                          mask_dir= root_dir + '/synthetic/armadillo-back/masks',
                                                                          label_dir= root_dir + '/synthetic/armadillo-back/normals-png',
                                                                          transform=augs_train)
-dataset_synthetic_polar_armadillo_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/armadillo-front/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/armadillo-front/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/armadillo-front/synthesis-normals',
+dataset_synthetic_polar_armadillo_front = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/armadillo-front/I-sum',
+
                                                                           mask_dir= root_dir + '/synthetic/armadillo-front/masks',
                                                                           label_dir= root_dir + '/synthetic/armadillo-front/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_dragon_vrip = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/dragon-vrip/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/dragon-vrip/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/dragon-vrip/synthesis-normals',
+dataset_synthetic_polar_dragon_vrip = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/dragon-vrip/I-sum',
+
                                                                       mask_dir= root_dir + '/synthetic/dragon-vrip/masks',
                                                                       label_dir= root_dir + '/synthetic/dragon-vrip/normals-png',
                                                                       transform=augs_train)
-dataset_synthetic_polar_happy_vrip_back= dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/happy-vrip-back/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/happy-vrip-back/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/happy-vrip-back/synthesis-normals',
+dataset_synthetic_polar_happy_vrip_back= dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/happy-vrip-back/I-sum',
+
                                                                          mask_dir= root_dir + '/synthetic/happy-vrip-back/masks',
                                                                          label_dir= root_dir + '/synthetic/happy-vrip-back/normals-png',
                                                                          transform=augs_train)
-dataset_synthetic_polar_happy_vrip_front= dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/happy-vrip-front/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/happy-vrip-front/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/happy-vrip-front/synthesis-normals',
+dataset_synthetic_polar_happy_vrip_front= dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/happy-vrip-front/I-sum',
+
                                                                           mask_dir= root_dir + '/synthetic/happy-vrip-front/masks',
                                                                           label_dir= root_dir + '/synthetic/happy-vrip-front/normals-png',
                                                                           transform=augs_train)
-dataset_synthetic_polar_middle_round_cup = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/middle-round-cup/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/middle-round-cup/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/middle-round-cup/synthesis-normals',
+dataset_synthetic_polar_middle_round_cup = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/middle-round-cup/I-sum',
+
                                                                            mask_dir= root_dir + '/synthetic/middle-round-cup/masks',
                                                                            label_dir= root_dir + '/synthetic/middle-round-cup/normals-png',
                                                                            transform=augs_train)
-dataset_synthetic_polar_bear_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/bear-front/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/bear-front/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/bear-front/synthesis-normals',
+dataset_synthetic_polar_bear_front = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/bear-front/I-sum',
+
                                                                      mask_dir= root_dir + '/synthetic/bear-front/masks',
                                                                      label_dir= root_dir + '/synthetic/bear-front/normals-png',
                                                                      transform=augs_train)
-dataset_synthetic_polar_cow_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/cow-front/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/cow-front/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/cow-front/synthesis-normals',
+dataset_synthetic_polar_cow_front = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/cow-front/I-sum',
+
                                                                     mask_dir= root_dir + '/synthetic/cow-front/masks',
                                                                     label_dir= root_dir + '/synthetic/cow-front/normals-png',
                                                                     transform=augs_train)
-dataset_synthetic_polar_cow_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/cow-back/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/cow-back/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/cow-back/synthesis-normals',
+dataset_synthetic_polar_cow_back = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/cow-back/I-sum',
+
                                                                    mask_dir= root_dir + '/synthetic/cow-back/masks',
                                                                    label_dir= root_dir + '/synthetic/cow-back/normals-png',
                                                                    transform=augs_train)
-dataset_synthetic_polar_pot_back = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/pot-back/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/pot-back/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/pot-back/synthesis-normals',
+dataset_synthetic_polar_pot_back = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/pot-back/I-sum',
+
                                                                    mask_dir= root_dir + '/synthetic/pot-back/masks',
                                                                    label_dir= root_dir + '/synthetic/pot-back/normals-png',
                                                                    transform=augs_train)
-dataset_synthetic_polar_pot_front = dataloaderDAN.DANSurfaceDataset(
-    dolp_dir= root_dir + '/synthetic/pot-front/params/DoLP',
-    aolp_dir= root_dir + '/synthetic/pot-front/params/AoLP',
-    synthesis_normals_dir= root_dir + '/synthetic/pot-front/synthesis-normals',
+dataset_synthetic_polar_pot_front = dataloaderI.ISurfaceDataset(input_I_sum_dir=root_dir + '/synthetic/pot-front/I-sum',
+
                                                                    mask_dir= root_dir + '/synthetic/pot-front/masks',
                                                                    label_dir= root_dir + '/synthetic/pot-front/normals-png',
                                                                    transform=augs_train)
@@ -452,17 +403,16 @@ for epoch in range(START_EPOCH,MAX_EPOCH):
     running_median = 0
     for iter_num,batch  in enumerate(tqdm(trainLoader)):
         total_iter_num+=1
-        params_t,normals_t, label_t,mask_t = batch
+        params_t,label_t,mask_t = batch
         params_t = params_t.to(device)
-        aolp = params_t[:,1,:,:]
-        normals_t = normals_t.to(device)
+        aolp = params_t
         label_t = label_t.to(device)
         # Forward + Backward Prop
         start = time.time()
         optimizer.zero_grad()
         torch.set_grad_enabled(True)
         with torch.autograd.set_detect_anomaly(True):
-            normal_vectors,atten_map = model(params_t,normals_t)
+            normal_vectors,atten_map = model(params_t)
             normal_vectors_norm = nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
             normal_vectors_norm = normal_vectors_norm
             loss = criterion(normal_vectors_norm, label_t.double(),mask_tensor=mask_t,atten_map = atten_map,aolp = aolp,reduction='sum',device=device,use_atten = use_atten)

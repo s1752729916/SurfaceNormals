@@ -28,15 +28,14 @@ def evaluation(model,testLoader,device,criterion,epoch,resultPath = None,name=No
     mean_list = []
     for iter_num, sample_batched in enumerate(tqdm(testLoader)):
         # print('')
-        params_t,normals_t, label_t,mask_t = sample_batched
+        params_t, label_t,mask_t = sample_batched
         params_t = params_t.to(device)
-        normals_t = normals_t.to(device)
         label_t = label_t.to(device)
-        aolp = params_t[:,1,:,:]
+        aolp = params_t
 
 
         with torch.no_grad():
-            normal_vectors,atten_map = model(params_t,normals_t)
+            normal_vectors,atten_map = model(params_t)
 
         normal_vectors_norm= nn.functional.normalize(normal_vectors.double(), p=2, dim=1)
         normal_vectors_norm = normal_vectors_norm
