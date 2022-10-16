@@ -151,9 +151,9 @@ class smqFusion(nn.Module):
             BatchNorm = SynchronizedBatchNorm2d
         else:
             BatchNorm = nn.BatchNorm2d
-        self.kernel_size = 9
+        self.kernel_size = 5
         self.lamda = 1
-        self.m = 0.5
+        self.m = 1.2
         self.mean_kernel = torch.ones([1,1,self.kernel_size,self.kernel_size])/self.kernel_size**2
         self.mean_kernel = self.mean_kernel.to(device)
         self.mean_kernel = nn.Parameter(data=self.mean_kernel, requires_grad=False)
@@ -214,7 +214,7 @@ class smqFusion(nn.Module):
         max_values = torch.reshape(max_values,[shape[0],1])
         atten_map = torch.div(atten_map,max_values)
         atten_map = torch.reshape(atten_map,[shape[0],shape[1],shape[2],shape[3]])
-
+        atten_map = 1.0-atten_map
 
 
         # orig-polar branch

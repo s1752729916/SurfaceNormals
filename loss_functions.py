@@ -19,13 +19,14 @@ def my_loss_cosine(input_vec,target_vec,atten_map,aolp,mask_tensor = None,reduct
     # new_input[:,2,:,:] = torch.cos(input_vec[:,0,:,:])
     new_input = input_vec
     cosine_loss = loss_fn_cosine(new_input,target_vec,atten_map = atten_map,mask_tensor=mask_tensor,reduction=reduction,device=device,use_atten = use_atten)
-    # aolp_loss = loss_aolp(new_input,aolp,mask_tensor)
+    aolp_loss = loss_aolp(new_input,aolp,mask_tensor,atten_map)
     # print('cosine_loss:',cosine_loss)
     # print('aolp_loss:',aolp_loss)
-    # loss = cosine_loss + aolp_loss
-    return cosine_loss
+    loss = cosine_loss + aolp_loss*0.05
+    return loss
 
-def loss_aolp(input_vec,aolp,mask_tensor):
+def loss_aolp(input_vec,aolp,mask_tensor,atten_map):
+    atten_map = atten_map.squeeze(1)
     aolp = aolp.squeeze(1) * torch.pi
     aolp_0 = aolp + torch.pi / 2
     aolp_1 = aolp - torch.pi / 2
@@ -43,11 +44,11 @@ def loss_aolp(input_vec,aolp,mask_tensor):
     error_1 = torch.min(torch.abs(phi - aolp_1),
                               torch.pi * 2 - torch.abs(phi - aolp_1))
     error = torch.min(error_0,error_1)
-
+    error = error * (atten_map)
     error[mask_invalid_pixels] = 0.0
     loss = torch.sum(error)
     total_valid_pixels = (~mask_invalid_pixels).sum()
-    loss = loss / total_valid_pixels
+    # loss = loss / total_valid_pixels
     return loss
 
 

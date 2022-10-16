@@ -388,7 +388,7 @@ writer = SummaryWriter()
 
 ###################### Train Model #############################
 #-- 1、config parameters
-MAX_EPOCH = 20
+MAX_EPOCH = 50
 saveModelInterval = 10
 CHECKPOINT_DIR = code_root_dir + '/CheckPoints'
 total_iter_num = 0
